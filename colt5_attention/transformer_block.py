@@ -631,13 +631,10 @@ class ConditionalRoutedAttention(nn.Module):
     def forward(
         self,
         x,
+        num_heavy_tokens_q = None,
+        num_heavy_tokens_kv = None,
+        mask = None,
         **kwargs
-        # *,
-        # num_heavy_tokens_q = None,
-        # num_heavy_tokens_kv = None,
-        # attention_mask=None,
-        # position_bias=None,
-        # mask = None
     ):
         batch, seq, device = *x.shape[:2], x.device
 
