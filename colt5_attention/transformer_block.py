@@ -691,8 +691,8 @@ class ConditionalRoutedAttention(nn.Module):
 
         # sum light and heavy branches
 
-        # return light_out + heavy_out
-        return super().forward(x)
+        return light_out + heavy_out
+        # return super().forward(x)
 
 # conditionally routed image feature map attention
 
