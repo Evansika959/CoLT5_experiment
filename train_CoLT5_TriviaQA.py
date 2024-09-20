@@ -77,8 +77,8 @@ for epoch in range(epochs):
     for batch in loop:
         input_ids = batch['input_ids'].to('cuda')
 
-        if is_sequence_too_short(input_ids):
-            print(f"Sequence too short: length {input_ids.size(1)}")
+
+        print(f"Sequence length {input_ids.size(1)}")
 
         labels = batch['labels'].to('cuda')
 
