@@ -454,9 +454,9 @@ class CoordinateDescentRouter(nn.Module):
 
         # get the topk scores and indices from the sparse matrix
 
-        # Print x.shape[-1] and k for debugging purposes
-        if s.shape[-1] < effective_k:
-            raise ValueError(f"Cannot perform topk with k={effective_k} when sequence length is {s.shape[-1]}")
+        # # Print x.shape[-1] and k for debugging purposes
+        # if s.shape[-1] < effective_k:
+        #     raise ValueError(f"Cannot perform topk with k={effective_k} when sequence length is {s.shape[-1]}")
 
 
 
