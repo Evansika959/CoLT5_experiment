@@ -631,12 +631,13 @@ class ConditionalRoutedAttention(nn.Module):
     def forward(
         self,
         x,
-        *,
-        num_heavy_tokens_q = None,
-        num_heavy_tokens_kv = None,
-        attention_mask=None,
-        position_bias=None,
-        mask = None
+        **kwargs
+        # *,
+        # num_heavy_tokens_q = None,
+        # num_heavy_tokens_kv = None,
+        # attention_mask=None,
+        # position_bias=None,
+        # mask = None
     ):
         batch, seq, device = *x.shape[:2], x.device
 
@@ -693,7 +694,8 @@ class ConditionalRoutedAttention(nn.Module):
 
         # sum light and heavy branches
 
-        return light_out + heavy_out
+        # return light_out + heavy_out
+        return super().forward(x)
 
 # conditionally routed image feature map attention
 
