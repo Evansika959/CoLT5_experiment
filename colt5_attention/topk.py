@@ -29,6 +29,7 @@ def topk(
 
     assert coor_descent_k_ratio >= 1.
     assert k > 0
+    assert k*coor_descent_k_ratio <= x.shape[-1]
 
     # whether to used fused kernel or not
 
