@@ -706,6 +706,7 @@ class ConditionalRoutedAttention(nn.Module):
 
         print("light_out.shape: ", light_out.shape)
         print("heavy_out.shape: ", heavy_out.shape)
+        print("light_out + heavy_out: ", (light_out + heavy_out).shape)
         return light_out + heavy_out
         # return super().forward(x)
 
