@@ -23,6 +23,9 @@ def preprocess_function(examples):
 
 tokenized_dataset = dataset.map(preprocess_function, batched=True)
 
+def is_sequence_too_short(input_ids, min_length=10):
+    # Check if the sequence is shorter than the minimum length
+    return input_ids.size(1) < min_length
 
 
 from colt5_attention.transformer_block import ConditionalRoutedTransformerBlock, ConditionalRoutedAttention, ConditionalRoutedFeedForward, ConditionalRoutedCrossAttention
@@ -68,25 +71,15 @@ model.train()
 
 from tqdm import tqdm  # Import tqdm
 
-# for epoch in range(4):  # Adjust based on your needs
-#     for batch in train_loader:
-#         input_ids = batch['input_ids'].to('cuda')
-# #        attention_mask = batch['attention_mask'].to('cuda')
-#         labels = batch['labels'].to('cuda')
-
-#         optimizer.zero_grad()
-#         outputs = model(input_ids=input_ids, labels=labels)
-#         loss = outputs.loss
-#         loss.backward()
-#         optimizer.step()
-
-#     print(f"Epoch {epoch + 1} finished with loss: {loss.item()}")
-
 epochs = 4  # Adjust based on your needs
 for epoch in range(epochs):
     loop = tqdm(train_loader, leave=True, desc=f"Epoch {epoch+1}/{epochs}")
     for batch in loop:
         input_ids = batch['input_ids'].to('cuda')
+
+        if is_sequence_too_short(input_ids):
+            print(f"Sequence too short: length {input_ids.size(1)}")
+
         labels = batch['labels'].to('cuda')
 
         optimizer.zero_grad()
