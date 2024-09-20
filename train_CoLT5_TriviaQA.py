@@ -38,7 +38,7 @@ for layer in model.encoder.block:
 
 for layer in model.decoder.block:
     layer.layer[0] = ConditionalRoutedAttention(dim=512,num_heavy_tokens_q=32, num_heavy_tokens_kv=32)  # Self-attention
-    layer.layer[1] = ConditionalRoutedCrossAttention(dim=512,num_heavy_tokens_q=32, num_heavy_tokens_kv=32)  # Cross-attention
+    layer.layer[1] = ConditionalRoutedCrossAttention(dim=512,num_tokens_q=32, num_tokens_kv=32)  # Cross-attention
     layer.layer[2] = ConditionalRoutedFeedForward(dim=2048,num_heavy_tokens=32)  # Feed-forward
 
 
