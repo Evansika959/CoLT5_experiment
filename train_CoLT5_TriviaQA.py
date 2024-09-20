@@ -11,11 +11,11 @@ tokenizer = T5Tokenizer.from_pretrained('t5-small')
 
 def preprocess_function(examples):
     inputs = [f"trivia question: {question}" for question in examples['question']]
-    model_inputs = tokenizer(inputs, max_length=512, truncation=True, padding='max_length')
+    model_inputs = tokenizer(inputs, max_length=512, truncation=True, padding='max_length',return_tensors='pt')
 
     # Handle answers
     answers = [answer['value'][0] if len(answer['value']) > 0 else "" for answer in examples['answer']]
-    labels = tokenizer(answers, max_length=128, truncation=True, padding='max_length')
+    labels = tokenizer(answers, max_length=128, truncation=True, padding='max_length',return_tensors='pt')
     
     model_inputs['labels'] = labels['input_ids']
     model_inputs['labels'] = [label if label is not None else 0 for label in model_inputs['labels']]  # Avoid empty values
