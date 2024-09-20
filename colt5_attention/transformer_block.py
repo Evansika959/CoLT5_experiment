@@ -634,6 +634,7 @@ class ConditionalRoutedAttention(nn.Module):
         *,
         num_heavy_tokens_q = None,
         num_heavy_tokens_kv = None,
+        attention_mask=None,
         mask = None
     ):
         batch, seq, device = *x.shape[:2], x.device
@@ -1087,6 +1088,7 @@ class ConditionalRoutedCrossAttention(nn.Module):
         num_tokens_q = None,
         num_tokens_kv = None,
         mask = None,
+        attention_mask=None,
         context_mask = None
     ):
         batch, device = x.shape[0], x.device
