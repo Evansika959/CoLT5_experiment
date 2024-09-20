@@ -38,7 +38,7 @@ for layer in model.encoder.block:
 
 for layer in model.decoder.block:
     layer.layer[0] = ConditionalRoutedAttention(dim=512,num_heavy_tokens_q=32, num_heavy_tokens_kv=32)  # Self-attention
-    layer.layer[1] = ConditionalRoutedCrossAttention(dim=512,num_tokens_q=32, num_tokens_kv=32)  # Cross-attention
+    layer.layer[1] = ConditionalRoutedCrossAttention(dim=512,num_tokens_q=512, num_tokens_kv=512)  # Cross-attention
     layer.layer[2] = ConditionalRoutedFeedForward(dim=512,num_heavy_tokens=32)  # Feed-forward
 
 
@@ -66,19 +66,40 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
 
 model.train()
 
-for epoch in range(4):  # Adjust based on your needs
-    for batch in train_loader:
+from tqdm import tqdm  # Import tqdm
+
+# for epoch in range(4):  # Adjust based on your needs
+#     for batch in train_loader:
+#         input_ids = batch['input_ids'].to('cuda')
+# #        attention_mask = batch['attention_mask'].to('cuda')
+#         labels = batch['labels'].to('cuda')
+
+#         optimizer.zero_grad()
+#         outputs = model(input_ids=input_ids, labels=labels)
+#         loss = outputs.loss
+#         loss.backward()
+#         optimizer.step()
+
+#     print(f"Epoch {epoch + 1} finished with loss: {loss.item()}")
+
+epochs = 4  # Adjust based on your needs
+for epoch in range(epochs):
+    loop = tqdm(train_loader, leave=True, desc=f"Epoch {epoch+1}/{epochs}")
+    for batch in loop:
         input_ids = batch['input_ids'].to('cuda')
-#        attention_mask = batch['attention_mask'].to('cuda')
         labels = batch['labels'].to('cuda')
 
         optimizer.zero_grad()
+
         outputs = model(input_ids=input_ids, labels=labels)
         loss = outputs.loss
         loss.backward()
         optimizer.step()
 
-    print(f"Epoch {epoch + 1} finished with loss: {loss.item()}")
+        # Update progress bar with loss
+        loop.set_postfix(loss=loss.item())
+
+    print(f"Epoch {epoch + 1} completed with loss: {loss.item()}")
 
 # Save the model
 model.save_pretrained('./colt5_triviaqa_model')
