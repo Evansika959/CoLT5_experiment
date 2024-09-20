@@ -407,6 +407,9 @@ class CoordinateDescentRouter(nn.Module):
         maybe_l2norm = l2norm if self.cosine_sim_routing else identity
 
         if exists(self.routing_token):
+            if x.dim() == 2:
+                x = x.unsqueeze(1)  # Add an extra dimension for sequence length
+
             s = einsum('b n d, r d -> b r n', maybe_l2norm(x), maybe_l2norm(self.routing_token))
         else:
             assert exists(routing_tokens)
