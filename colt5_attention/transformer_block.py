@@ -541,8 +541,10 @@ class ConditionalRoutedFeedForward(nn.Module):
 
         # route tokens appropriately for heavy branch
 
+        print("x.shape in conditional FFN: ", x.shape)
         indices, normalized_scores, routed_tokens, _ = self.router(x, num_tokens = num_heavy_tokens, mask = mask)
-
+        print("routing finished in conditional FFN")
+        
         # do the heavier branch with only routed tokens
 
         routed_tokens_out = self.heavy_ff(routed_tokens) * rearrange(normalized_scores, '... -> ... 1')
@@ -659,8 +661,10 @@ class ConditionalRoutedAttention(nn.Module):
 
         # route tokens appropriately for heavy branch
 
+        print("x.shape in conditional attention: ", x.shape)
         indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(x, num_tokens = num_heavy_tokens_q, mask = mask)
         indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(x, num_tokens = num_heavy_tokens_kv, mask = mask)
+        print("routing finished in conditional attention")
 
         # get rotary embeddings if specified
 
