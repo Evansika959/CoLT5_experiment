@@ -544,7 +544,7 @@ class ConditionalRoutedFeedForward(nn.Module):
         print("x.shape in conditional FFN: ", x.shape)
         indices, normalized_scores, routed_tokens, _ = self.router(x, num_tokens = num_heavy_tokens, mask = mask)
         print("routing finished in conditional FFN")
-        
+
         # do the heavier branch with only routed tokens
 
         routed_tokens_out = self.heavy_ff(routed_tokens) * rearrange(normalized_scores, '... -> ... 1')
@@ -704,6 +704,8 @@ class ConditionalRoutedAttention(nn.Module):
 
         # sum light and heavy branches
 
+        print("light_out.shape: ", light_out.shape)
+        print("heavy_out.shape: ", heavy_out.shape)
         return light_out + heavy_out
         # return super().forward(x)
 
