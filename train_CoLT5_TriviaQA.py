@@ -22,6 +22,9 @@ def preprocess_function(examples):
     
     model_inputs['labels'] = labels['input_ids']
     model_inputs['labels'] = [label if label is not None else 0 for label in model_inputs['labels']]  # Avoid empty values
+
+    # Convert attention_mask to boolean type
+    model_inputs['attention_mask'] = model_inputs['attention_mask'].bool()
     return model_inputs
 
 tokenized_dataset = dataset.map(preprocess_function, batched=True)
@@ -116,8 +119,9 @@ for epoch in range(epochs):
         input_ids = batch['input_ids'].to('cuda')
         mask = batch['attention_mask'].to('cuda')
 
-        # labels = batch['labels'].to('cuda')
-        labels = batch['labels'].squeeze().to('cuda')
+        labels = batch['labels'].to('cuda')
+        # labels = batch['labels'].squeeze().to('cuda')
+
         decoder_input_ids = labels.clone()  # Shift labels for decoder input
 
         optimizer.zero_grad()
