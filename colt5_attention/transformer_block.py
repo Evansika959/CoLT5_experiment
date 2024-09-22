@@ -1219,6 +1219,8 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         num_heavy_attn_tokens_q,
         num_heavy_attn_tokens_kv,
         num_heavy_ff_tokens,
+        num_routed_kv=1,
+        num_sets_kv=1,                # setting this greater than 1 would route multiple sets of key / values in cross-attention, each of size num_tokens_kv, using this many routing tokens
         light_dim_head = 64,
         light_heads = 8,
         light_window_size = 128,
@@ -1261,7 +1263,7 @@ class ConditionalRoutedDecoderBlock(nn.Module):
             dim = dim,
             num_tokens_q = num_heavy_attn_tokens_q,
             num_tokens_kv = num_heavy_attn_tokens_kv,
-            num_routed_kv = num_routed_kv,
+            num_sets_kv=num_sets_kv,
             router_straight_through = router_straight_through,
             router_kwargs = router_kwargs,
             multiply_keys_by_score = multiply_keys_by_score,
