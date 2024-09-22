@@ -135,6 +135,8 @@ for epoch in range(epochs):
         # Update progress bar
         loop.set_postfix(loss=loss.item())
 
+    # Save a checkpoint at the end of each epoch
+    torch.save(model.state_dict(), f'./checkpoints/colt5_epoch_{epoch+1}.pth')
     print(f"Epoch {epoch + 1} completed with loss: {loss.item()}")
 
 # Save the model
