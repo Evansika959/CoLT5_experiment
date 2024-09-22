@@ -407,9 +407,6 @@ class CoordinateDescentRouter(nn.Module):
         maybe_l2norm = l2norm if self.cosine_sim_routing else identity
 
         if exists(self.routing_token):
-            if x.dim() == 2:
-                x = x.unsqueeze(1)  # Add an extra dimension for sequence length
-
             s = einsum('b n d, r d -> b r n', maybe_l2norm(x), maybe_l2norm(self.routing_token))
         else:
             assert exists(routing_tokens)
@@ -453,12 +450,6 @@ class CoordinateDescentRouter(nn.Module):
             scores = scores.masked_fill(~mask, -torch.finfo(scores.dtype).max)
 
         # get the topk scores and indices from the sparse matrix
-
-        # # Print x.shape[-1] and k for debugging purposes
-        # if s.shape[-1] < effective_k:
-        #     raise ValueError(f"Cannot perform topk with k={effective_k} when sequence length is {s.shape[-1]}")
-
-
 
         selected_scores, selected_indices = scores.topk(num_tokens, dim = -1)
 
@@ -541,9 +532,7 @@ class ConditionalRoutedFeedForward(nn.Module):
 
         # route tokens appropriately for heavy branch
 
-        print("x.shape in conditional FFN: ", x.shape)
         indices, normalized_scores, routed_tokens, _ = self.router(x, num_tokens = num_heavy_tokens, mask = mask)
-        print("routing finished in conditional FFN")
 
         # do the heavier branch with only routed tokens
 
@@ -642,10 +631,10 @@ class ConditionalRoutedAttention(nn.Module):
     def forward(
         self,
         x,
+        *,
         num_heavy_tokens_q = None,
         num_heavy_tokens_kv = None,
-        mask = None,
-        **kwargs
+        mask = None
     ):
         batch, seq, device = *x.shape[:2], x.device
 
@@ -661,10 +650,8 @@ class ConditionalRoutedAttention(nn.Module):
 
         # route tokens appropriately for heavy branch
 
-        print("x.shape in conditional attention: ", x.shape)
         indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(x, num_tokens = num_heavy_tokens_q, mask = mask)
         indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(x, num_tokens = num_heavy_tokens_kv, mask = mask)
-        print("routing finished in conditional attention")
 
         # get rotary embeddings if specified
 
@@ -704,11 +691,7 @@ class ConditionalRoutedAttention(nn.Module):
 
         # sum light and heavy branches
 
-        print("light_out.shape: ", light_out.shape)
-        print("heavy_out.shape: ", heavy_out.shape)
-        print("light_out + heavy_out: ", (light_out + heavy_out).shape)
         return light_out + heavy_out
-        # return super().forward(x)
 
 # conditionally routed image feature map attention
 
@@ -1104,7 +1087,6 @@ class ConditionalRoutedCrossAttention(nn.Module):
         num_tokens_q = None,
         num_tokens_kv = None,
         mask = None,
-        attention_mask=None,
         context_mask = None
     ):
         batch, device = x.shape[0], x.device
