@@ -31,13 +31,17 @@ def is_sequence_too_short(input_ids, min_length=10):
     return input_ids.size(1) < min_length
 
 
-from colt5_attention import ConditionalRoutedTransformerBlock, ConditionalRoutedAttention, ConditionalRoutedFeedForward, ConditionalRoutedCrossAttention
+from colt5_attention.transformer_block import ConditionalRoutedTransformerBlock, ConditionalRoutedDecoderBlock
 
 # Define the CoLT5 Encoder
+
+seq_len = 512
+num_heavy_tokens = 32
+
 class CoLT5Encoder(nn.Module):
     def __init__(self, num_layers, dim):
         super(CoLT5Encoder, self).__init__()
-        self.layers = nn.ModuleList([ConditionalRoutedTransformerBlock(dim, num_heavy_attn_tokens_kv=32, num_heavy_attn_tokens_q=32, num_heavy_ff_tokens=32) for _ in range(num_layers)])
+        self.layers = nn.ModuleList([ConditionalRoutedTransformerBlock(dim, num_heavy_attn_tokens_kv=num_heavy_tokens, num_heavy_attn_tokens_q=num_heavy_tokens, num_heavy_ff_tokens=num_heavy_tokens) for _ in range(num_layers)])
         self.embed_tokens = nn.Embedding(32128, dim)  # Vocab size of 32,128 tokens
 
     def forward(self, input_ids, mask=None):
@@ -47,11 +51,11 @@ class CoLT5Encoder(nn.Module):
         return x
 
 
-# Define the CoLT5 Decoder
+# Define the CoLT5 Decoder with Cross-Attention
 class CoLT5Decoder(nn.Module):
     def __init__(self, num_layers, dim):
         super(CoLT5Decoder, self).__init__()
-        self.layers = nn.ModuleList([ConditionalRoutedTransformerBlock(dim, num_heavy_attn_tokens_kv=32, num_heavy_attn_tokens_q=32, num_heavy_ff_tokens=32) for _ in range(num_layers)])
+        self.layers = nn.ModuleList([ConditionalRoutedDecoderBlock(dim, num_heavy_attn_tokens_kv=num_heavy_tokens, num_heavy_attn_tokens_q=num_heavy_tokens, num_heavy_ff_tokens=num_heavy_tokens) for _ in range(num_layers)])
         self.embed_tokens = nn.Embedding(32128, dim)  # Vocab size of 32,128 tokens
 
     def forward(self, input_ids, encoder_hidden_states, mask=None):

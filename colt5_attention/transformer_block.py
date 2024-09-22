@@ -1209,3 +1209,96 @@ class ConditionalRoutedTransformerBlock(nn.Module):
         x = self.conditional_attn(x, mask = mask, num_heavy_tokens_q = num_heavy_attn_tokens_q, num_heavy_tokens_kv = num_heavy_attn_tokens_kv) + x
         x = self.conditional_ff(x, mask = mask, num_heavy_tokens = num_heavy_ff_tokens) + x
         return x
+
+# block for decoder (with cross attention)
+class ConditionalRoutedDecoderBlock(nn.Module):
+    def __init__(
+        self,
+        dim,
+        *,
+        num_heavy_attn_tokens_q,
+        num_heavy_attn_tokens_kv,
+        num_routed_kv = 1,
+        num_heavy_ff_tokens,
+        light_dim_head = 64,
+        light_heads = 8,
+        light_window_size = 128,
+        heavy_dim_head = 64,
+        heavy_heads = 8,
+        light_ff_mult = 0.5,
+        heavy_ff_mult = 4,
+        router_straight_through = True,
+        router_kwargs: dict = {},
+        multiply_keys_by_score = False,
+        multiply_queries_by_score = False,
+        use_triton = False,
+        use_null_q_tokens = True,
+        use_flash_attn = False
+    ):
+        super().__init__()
+        
+        # Self-attention block for decoder
+        self.conditional_self_attn = ConditionalRoutedAttention(
+            dim,
+            light_dim_head = light_dim_head,
+            light_heads = light_heads,
+            light_window_size = light_window_size,
+            heavy_dim_head = heavy_dim_head,
+            heavy_heads = heavy_heads,
+            num_heavy_tokens_q = num_heavy_attn_tokens_q,
+            num_heavy_tokens_kv = num_heavy_attn_tokens_kv,
+            num_routed_kv = num_routed_kv,
+            router_straight_through = router_straight_through,
+            router_kwargs = router_kwargs,
+            multiply_keys_by_score = multiply_keys_by_score,
+            multiply_queries_by_score = multiply_queries_by_score,
+            use_triton = use_triton,
+            use_null_q_tokens = use_null_q_tokens,
+            use_flash_attn = use_flash_attn
+        )
+
+        # Cross-attention block for attending to encoder states
+        self.conditional_cross_attn = ConditionalRoutedCrossAttention(
+            dim = dim,
+            num_tokens_q = num_heavy_attn_tokens_q,
+            num_tokens_kv = num_heavy_attn_tokens_kv,
+            num_routed_kv = num_routed_kv,
+            router_straight_through = router_straight_through,
+            router_kwargs = router_kwargs,
+            multiply_keys_by_score = multiply_keys_by_score,
+            use_triton = use_triton,
+            use_null_q_tokens = use_null_q_tokens,
+            use_flash_attn = use_flash_attn
+        )
+
+        # Feedforward network
+        self.conditional_ff = ConditionalRoutedFeedForward(
+            dim,
+            num_heavy_tokens = num_heavy_ff_tokens,
+            light_ff_mult = light_ff_mult,
+            heavy_ff_mult = heavy_ff_mult,
+            router_straight_through = router_straight_through,
+            router_kwargs = router_kwargs,
+            use_triton = use_triton
+        )
+
+    def forward(
+        self,
+        x,
+        encoder_hidden_states,
+        mask = None,
+        encoder_mask = None,
+        num_heavy_attn_tokens_q = None,
+        num_heavy_attn_tokens_kv = None,
+        num_heavy_ff_tokens = None
+    ):
+        # Self-attention within the decoder block
+        x = self.conditional_self_attn(x, mask=mask, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
+        
+        # Cross-attention with encoder hidden states
+        x = self.conditional_cross_attn(x, context=encoder_hidden_states, mask=mask, context_mask=encoder_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv) + x
+        
+        # Feedforward network
+        x = self.conditional_ff(x, mask=mask, num_heavy_tokens=num_heavy_ff_tokens) + x
+        return x
+
