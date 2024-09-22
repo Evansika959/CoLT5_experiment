@@ -1101,6 +1101,7 @@ class ConditionalRoutedCrossAttention(nn.Module):
         # route the long contexts
 
         key_value_length = context.shape[-2]
+        
         num_tokens_kv = default(num_tokens_kv, self.num_tokens_kv)
 
         routed_tokens_kv = context

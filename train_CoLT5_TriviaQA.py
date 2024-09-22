@@ -61,7 +61,7 @@ class CoLT5Decoder(nn.Module):
     def forward(self, input_ids, encoder_hidden_states, mask=None):
         x = self.embed_tokens(input_ids)
         for layer in self.layers:
-            x = layer(x, mask)
+            x = layer(x, encoder_hidden_states, mask)
         return x
 
 
