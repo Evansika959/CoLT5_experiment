@@ -1,3 +1,6 @@
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
 from datasets import load_dataset
 
 # Load the train split of TriviaQA
@@ -28,24 +31,55 @@ def is_sequence_too_short(input_ids, min_length=10):
     return input_ids.size(1) < min_length
 
 
-from colt5_attention.transformer_block import ConditionalRoutedTransformerBlock, ConditionalRoutedAttention, ConditionalRoutedFeedForward, ConditionalRoutedCrossAttention
-from transformers import T5ForConditionalGeneration
+from colt5_attention import ConditionalRoutedTransformerBlock, ConditionalRoutedAttention, ConditionalRoutedFeedForward, ConditionalRoutedCrossAttention
 
-# Load pre-trained T5 model
-model = T5ForConditionalGeneration.from_pretrained('t5-small')
+# Define the CoLT5 Encoder
+class CoLT5Encoder(nn.Module):
+    def __init__(self, num_layers, dim):
+        super(CoLT5Encoder, self).__init__()
+        self.layers = nn.ModuleList([ConditionalRoutedTransformerBlock(dim, num_heavy_attn_tokens_kv=32, num_heavy_attn_tokens_q=32, num_heavy_ff_tokens=32) for _ in range(num_layers)])
+        self.embed_tokens = nn.Embedding(32128, dim)  # Vocab size of 32,128 tokens
 
-# Replace default attention blocks with Conditional Routed ones
-for layer in model.encoder.block:
-    layer.layer[0] = ConditionalRoutedAttention(dim=512, num_heavy_tokens_q=32, num_heavy_tokens_kv=32)  # Conditional attention layer
-    layer.layer[1] = ConditionalRoutedFeedForward(dim=512, num_heavy_tokens=32)  # Conditional feed-forward layer
-
-for layer in model.decoder.block:
-    layer.layer[0] = ConditionalRoutedAttention(dim=512,num_heavy_tokens_q=32, num_heavy_tokens_kv=32)  # Self-attention
-    layer.layer[1] = ConditionalRoutedCrossAttention(dim=512,num_tokens_q=512, num_tokens_kv=512)  # Cross-attention
-    layer.layer[2] = ConditionalRoutedFeedForward(dim=512,num_heavy_tokens=32)  # Feed-forward
+    def forward(self, input_ids, mask=None):
+        x = self.embed_tokens(input_ids)
+        for layer in self.layers:
+            x = layer(x, mask)
+        return x
 
 
-model.to('cuda')
+# Define the CoLT5 Decoder
+class CoLT5Decoder(nn.Module):
+    def __init__(self, num_layers, dim):
+        super(CoLT5Decoder, self).__init__()
+        self.layers = nn.ModuleList([ConditionalRoutedTransformerBlock(dim, num_heavy_attn_tokens_kv=32, num_heavy_attn_tokens_q=32, num_heavy_ff_tokens=32) for _ in range(num_layers)])
+        self.embed_tokens = nn.Embedding(32128, dim)  # Vocab size of 32,128 tokens
+
+    def forward(self, input_ids, encoder_hidden_states, mask=None):
+        x = self.embed_tokens(input_ids)
+        for layer in self.layers:
+            x = layer(x, mask)
+        return x
+
+
+# Define the full CoLT5 model
+class CoLT5(nn.Module):
+    def __init__(self, num_layers, dim):
+        super(CoLT5, self).__init__()
+        self.encoder = CoLT5Encoder(num_layers=num_layers, dim=dim)
+        self.decoder = CoLT5Decoder(num_layers=num_layers, dim=dim)
+        self.lm_head = nn.Linear(dim, 32128)  # Output layer to vocab size
+
+    def forward(self, input_ids, decoder_input_ids, mask=None):
+        # Encode the input
+        encoder_hidden_states = self.encoder(input_ids, mask)
+        # Decode the input
+        decoder_hidden_states = self.decoder(decoder_input_ids, encoder_hidden_states, mask)
+        # Generate final token predictions
+        logits = self.lm_head(decoder_hidden_states)
+        return logits
+
+# Load CoLT5 model
+model = CoLT5(num_layers=6, dim=512).to('cuda')
 
 # Define the Training Loop
 
@@ -77,19 +111,24 @@ for epoch in range(epochs):
     for batch in loop:
         input_ids = batch['input_ids'].to('cuda')
 
-
-        print(f"Sequence length {input_ids.size(1)}")
-
-        labels = batch['labels'].to('cuda')
+        # labels = batch['labels'].to('cuda')
+        labels = batch['labels'].squeeze().to('cuda')
+        decoder_input_ids = labels.clone()  # Shift labels for decoder input
 
         optimizer.zero_grad()
 
-        outputs = model(input_ids=input_ids, labels=labels)
-        loss = outputs.loss
+        # Forward pass
+        logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids)
+        
+        # Loss function: Cross-Entropy
+        loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
+        loss = loss_fn(logits.view(-1, logits.size(-1)), labels.view(-1))
+        
+        # Backward pass
         loss.backward()
         optimizer.step()
-
-        # Update progress bar with loss
+        
+        # Update progress bar
         loop.set_postfix(loss=loss.item())
 
     print(f"Epoch {epoch + 1} completed with loss: {loss.item()}")
