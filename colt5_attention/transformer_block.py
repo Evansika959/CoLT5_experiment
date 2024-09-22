@@ -1218,7 +1218,6 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         *,
         num_heavy_attn_tokens_q,
         num_heavy_attn_tokens_kv,
-        num_routed_kv = 1,
         num_heavy_ff_tokens,
         light_dim_head = 64,
         light_heads = 8,
