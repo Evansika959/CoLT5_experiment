@@ -77,7 +77,7 @@ class CoLT5(nn.Module):
         # Encode the input
         encoder_hidden_states = self.encoder(input_ids, mask)
         # Decode the input
-        decoder_hidden_states = self.decoder(decoder_input_ids, encoder_hidden_states=encoder_hidden_states, mask=None)
+        decoder_hidden_states = self.decoder(decoder_input_ids, encoder_hidden_states=encoder_hidden_states, mask=mask)
         # Generate final token predictions
         logits = self.lm_head(decoder_hidden_states)
         return logits
@@ -94,7 +94,7 @@ from torch.utils.data import DataLoader
 data_collator = DataCollatorWithPadding(tokenizer, padding=True)
 
 # Remove unnecessary columns after tokenization
-tokenized_dataset = tokenized_dataset.remove_columns(['question', 'question_id', 'question_source', 'entity_pages', 'search_results', 'answer', 'attention_mask'])
+tokenized_dataset = tokenized_dataset.remove_columns(['question', 'question_id', 'question_source', 'entity_pages', 'search_results', 'answer'])
 
 # Print data types of all columns in the tokenized dataset
 for column in tokenized_dataset.features:
@@ -114,6 +114,7 @@ for epoch in range(epochs):
     loop = tqdm(train_loader, leave=True, desc=f"Epoch {epoch+1}/{epochs}")
     for batch in loop:
         input_ids = batch['input_ids'].to('cuda')
+        mask = batch['attention_mask'].to('cuda')
 
         # labels = batch['labels'].to('cuda')
         labels = batch['labels'].squeeze().to('cuda')
@@ -122,7 +123,7 @@ for epoch in range(epochs):
         optimizer.zero_grad()
 
         # Forward pass
-        logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids)
+        logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask)
         
         # Loss function: Cross-Entropy
         loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
