@@ -1101,7 +1101,6 @@ class ConditionalRoutedCrossAttention(nn.Module):
         # route the long contexts
 
         key_value_length = context.shape[-2]
-        
         num_tokens_kv = default(num_tokens_kv, self.num_tokens_kv)
 
         routed_tokens_kv = context
@@ -1109,6 +1108,7 @@ class ConditionalRoutedCrossAttention(nn.Module):
         normalized_scores_kv = None
 
         should_route_kv = key_value_length > num_tokens_kv
+        should_route_queries = key_value_length > num_tokens_q
 
         if should_route_kv:
             indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(context, num_tokens = num_tokens_kv, mask = context_mask)
@@ -1142,6 +1142,7 @@ class ConditionalRoutedCrossAttention(nn.Module):
             out = self.q_router.route_back(out, routed_tokens_out, indices_q)
 
         return out
+
 
 # block
 
