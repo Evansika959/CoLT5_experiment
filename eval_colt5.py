@@ -44,7 +44,7 @@ for column in tokenized_dataset.features:
 data_collator = DataCollatorWithPadding(tokenizer, padding=True)
 
 # DataLoader for the test set
-test_loader = DataLoader(tokenized_test_dataset, batch_size=8, shuffle=True, collate_fn=data_collator)
+test_loader = DataLoader(tokenized_dataset, batch_size=8, shuffle=True, collate_fn=data_collator)
 
 # Evaluate the model
 total_loss = 0
