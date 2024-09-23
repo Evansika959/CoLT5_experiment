@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from datasets import load_dataset
-from transformers import T5Tokenizer
+from transformers import T5Tokenizer, DataCollatorWithPadding
 from tqdm import tqdm  # Import tqdm for the progress bar
 from colt5_attention.colt5_model import CoLT5
 import torch.nn as nn
@@ -40,8 +40,11 @@ tokenized_dataset = tokenized_test_dataset.remove_columns(['question', 'question
 for column in tokenized_dataset.features:
     print(f"Column: {column}, Type: {tokenized_dataset.features[column]}")
 
+# Use the DataCollatorWithPadding to pad inputs dynamically
+data_collator = DataCollatorWithPadding(tokenizer, padding=True)
+
 # DataLoader for the test set
-test_loader = DataLoader(tokenized_test_dataset, batch_size=8)
+test_loader = DataLoader(tokenized_test_dataset, batch_size=8, shuffle=True, collate_fn=data_collator)
 
 # Evaluate the model
 total_loss = 0
