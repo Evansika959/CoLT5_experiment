@@ -14,9 +14,13 @@ tokenizer = T5Tokenizer.from_pretrained('t5-small')
 # Load the TriviaQA dataset
 dataset = load_dataset('trivia_qa', 'unfiltered', split='train')
 
-# Randomly select a sample from the dataset
-sample_index = random.randint(0, len(dataset) - 1)
-sample = dataset[sample_index]
+# Randomly select a sample until we find one with a non-empty answer
+while True:
+    index = random.randint(0, len(dataset) - 1)
+    sample = dataset[index]
+    
+    if sample['answer']:  # Check if the answer is not empty
+        break
 
 # Prepare the input question
 sample_question = sample['question']
