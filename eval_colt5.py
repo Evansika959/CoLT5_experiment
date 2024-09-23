@@ -30,11 +30,6 @@ def preprocess_function(examples):
 # Tokenize the test dataset
 tokenized_test_dataset = test_dataset.map(preprocess_function, batched=True)
 
-# Use only a fraction of the dataset (e.g., 10%)
-fraction = 0.1
-fraction_size = int(len(tokenized_test_dataset) * fraction)
-tokenized_test_dataset = tokenized_test_dataset.select(range(fraction_size))
-
 # DataLoader for the test set
 test_loader = DataLoader(tokenized_test_dataset, batch_size=8)
 
@@ -44,7 +39,7 @@ with torch.no_grad():  # Disable gradient calculation for evaluation
     loop = tqdm(test_loader, leave=True, desc="Evaluating")
     for batch in loop:
         input_ids = batch['input_ids'].to('cuda')
-        labels = batch['labels'].squeeze().to('cuda')
+        labels = batch['labels'].to('cuda')
 
         # Forward pass
         logits = model(input_ids=input_ids, decoder_input_ids=labels)
