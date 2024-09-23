@@ -25,10 +25,20 @@ def preprocess_function(examples):
     labels = tokenizer(answers, max_length=512, truncation=True, padding='max_length', return_tensors='pt')
     
     model_inputs['labels'] = labels['input_ids']
+
+    # Convert attention_mask to boolean type
+    model_inputs['attention_mask'] = model_inputs['attention_mask'].bool()
     return model_inputs
 
 # Tokenize the test dataset
 tokenized_test_dataset = test_dataset.map(preprocess_function, batched=True)
+
+# Remove unnecessary columns after tokenization
+tokenized_dataset = tokenized_test_dataset.remove_columns(['question', 'question_id', 'question_source', 'entity_pages', 'search_results', 'answer'])
+
+# Print data types of all columns in the tokenized dataset
+for column in tokenized_dataset.features:
+    print(f"Column: {column}, Type: {tokenized_dataset.features[column]}")
 
 # DataLoader for the test set
 test_loader = DataLoader(tokenized_test_dataset, batch_size=8)
@@ -40,9 +50,10 @@ with torch.no_grad():  # Disable gradient calculation for evaluation
     for batch in loop:
         input_ids = batch['input_ids'].to('cuda')
         labels = batch['labels'].to('cuda')
+        mask = batch['attention_mask'].to('cuda')
 
         # Forward pass
-        logits = model(input_ids=input_ids, decoder_input_ids=labels)
+        logits = model(input_ids=input_ids, decoder_input_ids=labels, mask=mask)
         
         # Loss function: Cross-Entropy
         loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
