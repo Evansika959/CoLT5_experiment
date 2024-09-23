@@ -21,7 +21,7 @@ def preprocess_function(examples):
     model_inputs = tokenizer(inputs, max_length=512, truncation=True, padding='max_length', return_tensors='pt')
 
     # Handle answers
-    answers = [answer['value'][0] if len(answer['value']) > 0 else "" for answer in examples['answer']]
+    answers = [answer['value'] if len(answer['value']) > 0 else "" for answer in examples['answer']]
     labels = tokenizer(answers, max_length=512, truncation=True, padding='max_length', return_tensors='pt')
     
     model_inputs['labels'] = labels['input_ids']
