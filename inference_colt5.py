@@ -12,7 +12,7 @@ model.eval()  # Set the model to evaluation mode
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
 
 # Load the TriviaQA dataset
-dataset = load_dataset('trivia_qa', 'unfiltered', split='train')
+dataset = load_dataset('trivia_qa', 'unfiltered', split='validation')
 
 # Randomly select a sample until we find one with a non-empty answer
 while True:
@@ -34,15 +34,31 @@ attention_mask = input_ids['attention_mask'].to('cuda')
 labels = sample['answer'][0]['value'] if sample['answer'] else ""
 labels_tokens = tokenizer(labels, return_tensors='pt', padding='max_length', truncation=True, max_length=128).input_ids.to('cuda')
 
-# Perform inference
-with torch.no_grad():
-    logits = model(input_ids=input_ids['input_ids'], decoder_input_ids=labels_tokens, mask=attention_mask)
+# Function to generate answer
+def generate_answer(model, input_ids, max_length=128):
+    # Create an empty tensor for the decoder input
+    decoder_input_ids = torch.full((1, 1), tokenizer.pad_token_id, dtype=torch.long).to('cuda')  # Start with a padding token
 
-# Get the predicted token IDs
-predicted_ids = torch.argmax(logits, dim=-1)
+    # Generate up to max_length tokens
+    for _ in range(max_length):
+        # Forward pass
+        outputs = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids)
+        logits = outputs  # Assuming the last output is logits
 
-# Decode the predicted token IDs to text
-predicted_answer = tokenizer.decode(predicted_ids[0], skip_special_tokens=True)
+        # Get the predicted token (argmax)
+        next_token_id = torch.argmax(logits[:, -1, :], dim=-1).item()
+        
+        # Append the predicted token to the decoder input
+        decoder_input_ids = torch.cat((decoder_input_ids, torch.tensor([[next_token_id]], device='cuda')), dim=1)
+
+        # If the predicted token is the end of sequence token, break
+        if next_token_id == tokenizer.eos_token_id:
+            break
+
+    return tokenizer.decode(decoder_input_ids[0], skip_special_tokens=True)
+
+# Generate answer
+predicted_answer = generate_answer(model, input_ids)
 
 # Print the results
 print(f"Sample Question: {sample_question}")
