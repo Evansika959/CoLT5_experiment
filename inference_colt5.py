@@ -39,6 +39,8 @@ def generate_answer(model, input_ids, max_length=128):
     # Create an empty tensor for the decoder input
     decoder_input_ids = torch.full((1, 1), tokenizer.pad_token_id, dtype=torch.long).to('cuda')  # Start with a padding token
 
+    print(decoder_input_ids.shape)
+
     # Generate up to max_length tokens
     for _ in range(max_length):
         # Forward pass
