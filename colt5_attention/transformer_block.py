@@ -1295,11 +1295,12 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         num_heavy_ff_tokens = None
     ):
         decoder_mask = torch.triu(torch.ones(512, 512), diagonal=1).bool().to('cuda')
+        print(decoder_mask)
         # Self-attention within the decoder block
-        x = self.conditional_self_attn(x, mask=decoder_mask, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
+        x = self.conditional_self_attn(x, mask=None, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
         
         # Cross-attention with encoder hidden states
-        x = self.conditional_cross_attn(x, context=encoder_hidden_states, mask=decoder_mask, context_mask=context_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv) + x
+        x = self.conditional_cross_attn(x, context=encoder_hidden_states, mask=None, context_mask=context_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv) + x
         
         # Feedforward network
         x = self.conditional_ff(x, num_heavy_tokens=num_heavy_ff_tokens) + x

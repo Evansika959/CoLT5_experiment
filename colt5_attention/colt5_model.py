@@ -49,7 +49,7 @@ class CoLT5(nn.Module):
         # Encode the input
         encoder_hidden_states = self.encoder(input_ids, mask=mask)
         # Decode the input
-        decoder_hidden_states = self.decoder(decoder_input_ids, encoder_hidden_states=encoder_hidden_states, mask=decoder_mask)
+        decoder_hidden_states = self.decoder(decoder_input_ids, encoder_hidden_states=encoder_hidden_states, mask=mask)
         # Generate final token predictions
         logits = self.lm_head(decoder_hidden_states)
         return logits
