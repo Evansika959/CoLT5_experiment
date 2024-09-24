@@ -1300,7 +1300,7 @@ class ConditionalRoutedDecoderBlock(nn.Module):
 
         print(decoder_mask.shape)
         print(context_mask.shape)
-        print(context_mask)
+        print(x)
 
         # Self-attention within the decoder block
         x = self.conditional_self_attn(x, mask=decoder_mask, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
