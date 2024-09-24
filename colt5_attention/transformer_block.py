@@ -1298,6 +1298,10 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         # Expand to batch size
         decoder_mask = decoder_mask.unsqueeze(0).expand(8, -1, -1)  # Shape [8, 512, 512]
 
+        print(decoder_mask.shape)
+        print(context_mask.shape)
+        print(context_mask)
+
         # Self-attention within the decoder block
         x = self.conditional_self_attn(x, mask=decoder_mask, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
         
