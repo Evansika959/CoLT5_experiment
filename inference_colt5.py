@@ -34,10 +34,12 @@ attention_mask = input_ids['attention_mask'].bool().to('cuda')
 labels = sample['answer']['value'] if sample['answer'] else ""
 labels_tokens = tokenizer(labels, return_tensors='pt', padding='max_length', truncation=True, max_length=512).input_ids.to('cuda')
 
+# Print the sample question and expected answer
+print(f"Sample Question: {sample_question}")
+print(f"Expected Answer: {labels}")
+
 # Generate the answer
 predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=512, temperature=1.0, top_k=None)
 
 # Print the results
-print(f"Sample Question: {sample_question}")
-print(f"Expected Answer: {labels}")
 print(f"Predicted Answer: {predicted_answer}")
