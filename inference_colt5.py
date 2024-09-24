@@ -41,5 +41,8 @@ print(f"Expected Answer: {labels}")
 # Generate the answer
 predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=512, temperature=1.0, top_k=None)
 
+generated_ids = predicted_answer[0].cpu().tolist()
+generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
+
 # Print the results
-print(f"Predicted Answer: {predicted_answer}")
+print(f"Predicted Answer: {generated_text}")

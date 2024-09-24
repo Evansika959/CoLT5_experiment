@@ -55,7 +55,7 @@ class CoLT5(nn.Module):
         return logits
     
 
-    def generate(self, input_ids, encoder_mask, max_new_tokens, temperature=1.0, top_k=None):
+    def generate(self, input_ids, encoder_mask, max_new_tokens, temperature=1.0, top_k=None, verbose=False):
         """
         Generate text from the CoLT5 model.
 
@@ -100,9 +100,13 @@ class CoLT5(nn.Module):
             # Append the predicted token to the decoder input
             decoder_input_ids = torch.cat((decoder_input_ids, next_token_id), dim=1)
 
-            # Print the current output word
-            current_sentence = self.tokenizer.decode(decoder_input_ids, skip_special_tokens=True)
-            print(f"Generated: {current_sentence}")
+            if verbose:
+                # Convert the generated token IDs to a list
+                generated_ids = decoder_input_ids.squeeze().cpu().tolist()  # Remove batch dimension and move to CPU
+
+                # Decode the generated token IDs to text
+                generated_text = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
+                print(f"Generated: {generated_text}")
 
             # If the predicted token is the end of sequence token, break
             if next_token_id.item() == self.tokenizer.eos_token_id:
