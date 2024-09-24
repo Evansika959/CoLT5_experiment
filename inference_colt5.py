@@ -31,7 +31,7 @@ input_ids = tokenizer(input_text, return_tensors='pt', padding='max_length', tru
 attention_mask = input_ids['attention_mask'].to('cuda')
 
 # Prepare the labels
-labels = sample['answer'][0]['value'] if sample['answer'] else ""
+labels = sample['answer']['value'] if sample['answer'] else ""
 labels_tokens = tokenizer(labels, return_tensors='pt', padding='max_length', truncation=True, max_length=128).input_ids.to('cuda')
 
 # Function to generate answer
