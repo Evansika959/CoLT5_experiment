@@ -1241,7 +1241,7 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         super().__init__()
         
         # Self-attention block for decoder
-        self.conditional_self_attn = ConditionalRoutedAttention(
+        self.conditional_self_auto_regressive_attn = ConditionalRoutedAutoregressiveAttention(
             dim,
             light_dim_head = light_dim_head,
             light_heads = light_heads,
@@ -1294,20 +1294,11 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         num_heavy_attn_tokens_kv = None,
         num_heavy_ff_tokens = None
     ):
-        decoder_mask = torch.triu(torch.ones(512, 512), diagonal=1).bool().to('cuda')
-        # Expand to batch size
-        decoder_mask = decoder_mask.unsqueeze(0).expand(8, -1, -1)  # Shape [8, 512, 512]
-
-        print(decoder_mask.shape)
-        print(context_mask.shape)
-        print(x)
-        print(encoder_hidden_states)
-
         # Self-attention within the decoder block
-        x = self.conditional_self_attn(x, mask=decoder_mask, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
+        x = self.conditional_self_auto_regressive_attn(x, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
         
         # Cross-attention with encoder hidden states
-        x = self.conditional_cross_attn(x, context=encoder_hidden_states, mask=decoder_mask, context_mask=context_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv) + x
+        x = self.conditional_cross_attn(x, context=encoder_hidden_states, context_mask=context_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv) + x
         
         # Feedforward network
         x = self.conditional_ff(x, num_heavy_tokens=num_heavy_ff_tokens) + x
