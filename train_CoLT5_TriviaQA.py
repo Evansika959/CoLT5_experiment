@@ -77,7 +77,7 @@ for epoch in range(epochs):
         decoder_input_ids = torch.full(labels.shape, tokenizer.pad_token_id, dtype=torch.long).to('cuda')
         decoder_input_ids[:,1:] = labels[:,:-1]  # Shift labels for decoder input
 
-        print("decoder inputs", decoder_input_ids.shape) # Debugging
+        # print("decoder inputs", decoder_input_ids.shape) # Debugging
 
         optimizer.zero_grad()
 
