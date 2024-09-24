@@ -55,8 +55,11 @@ with torch.no_grad():  # Disable gradient calculation for evaluation
         labels = batch['labels'].to('cuda')
         mask = batch['attention_mask'].to('cuda')
 
+        decoder_input_ids = torch.full(labels.shape, tokenizer.pad_token_id, dtype=torch.long).to('cuda')
+        decoder_input_ids[:,1:] = labels[:,:-1]  # Shift labels for decoder input
+
         # Forward pass
-        logits = model(input_ids=input_ids, decoder_input_ids=labels, mask=mask)
+        logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask)
         
         # Loss function: Cross-Entropy
         loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
