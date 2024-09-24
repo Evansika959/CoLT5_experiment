@@ -6,7 +6,7 @@ from colt5_attention.colt5_model import CoLT5
 
 # Load the model and tokenizer
 model = CoLT5(num_layers=6, dim=512).to('cuda')
-model.load_state_dict(torch.load('./checkpoints/colt5_epoch_1.pth'))
+model.load_state_dict(torch.load('./checkpoint1.pth'))
 model.eval()  # Set the model to evaluation mode
 
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
