@@ -44,7 +44,8 @@ def generate_answer(model, input_ids, max_length=128):
     # Generate up to max_length tokens
     for _ in range(max_length):
         # Forward pass
-        outputs = model(input_ids=input_ids['input_ids'], decoder_input_ids=decoder_input_ids, mask=attention_mask)
+        with torch.no_grad():
+            outputs = model(input_ids=input_ids['input_ids'], decoder_input_ids=decoder_input_ids, mask=attention_mask)
         logits = outputs  # Assuming the last output is logits
 
         # Get the predicted token (argmax)
