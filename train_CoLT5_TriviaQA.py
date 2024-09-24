@@ -64,6 +64,13 @@ model.train()
 
 from tqdm import tqdm  # Import tqdm
 
+import os
+
+# Create the directory if it does not exist
+checkpoint_dir = './checkpoints_924'
+if not os.path.exists(checkpoint_dir):
+    os.makedirs(checkpoint_dir)
+
 epochs = 4  # Adjust based on your needs
 for epoch in range(epochs):
     loop = tqdm(train_loader, leave=True, desc=f"Epoch {epoch+1}/{epochs}")
@@ -96,7 +103,7 @@ for epoch in range(epochs):
         loop.set_postfix(loss=loss.item())
 
     # Save a checkpoint at the end of each epoch
-    torch.save(model.state_dict(), f'./checkpoints/colt5_epoch_{epoch+1}.pth')
+    torch.save(model.state_dict(), f'{checkpoint_dir}/colt5_epoch_{epoch+1}.pth')
     print(f"Epoch {epoch + 1} completed with loss: {loss.item()}")
 
 # Save the model
