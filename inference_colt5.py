@@ -37,7 +37,7 @@ labels_tokens = tokenizer(labels, return_tensors='pt', padding='max_length', tru
 # Function to generate answer
 def generate_answer(model, input_ids, max_length=128):
     # Create an empty tensor for the decoder input
-    decoder_input_ids = torch.full((1, 1), tokenizer.pad_token_id, dtype=torch.long).to('cuda')  # Start with a padding token
+    decoder_input_ids = torch.full((1, 512), tokenizer.pad_token_id, dtype=torch.long).to('cuda')  # Start with a padding token
 
     print(decoder_input_ids.shape)
 
