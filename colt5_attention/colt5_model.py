@@ -77,11 +77,11 @@ class CoLT5(nn.Module):
         for _ in range(max_new_tokens):
              # Prepare the causal mask
             seq_length = decoder_input_ids.size(1)
-            decoder_mask = torch.triu(torch.ones(seq_length, seq_length), diagonal=1).bool().to('cuda')
+            decoder_mask = torch.zeros(seq_length, dtype=torch.bool).to('cuda')
 
             # Forward pass through the model
             with torch.no_grad():
-                logits = self(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=encoder_mask, decoder_mask=decoder_mask)
+                logits = self(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=encoder_mask)
             
             # Get the logits for the last token in the sequence
             logits = logits[:, -1, :] / temperature
@@ -101,8 +101,8 @@ class CoLT5(nn.Module):
             decoder_input_ids = torch.cat((decoder_input_ids, next_token_id), dim=1)
 
             # Print the current output word
-            current_word = self.tokenizer.decode(next_token_id.item())
-            print(f"Generated: {current_word}")
+            current_sentence = self.tokenizer.decode(decoder_input_ids, skip_special_tokens=True)
+            print(f"Generated: {current_sentence}")
 
             # If the predicted token is the end of sequence token, break
             if next_token_id.item() == self.tokenizer.eos_token_id:
