@@ -1023,7 +1023,7 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         heavy_out = F.pad(heavy_out, (0, 0, window_size, 0), value = 0.)
 
         # sum light and heavy branches
-
+        print(light_out.shape, heavy_out.shape)
         return light_out + heavy_out
 
 # adapting the conditional routed self attention to cross attention
