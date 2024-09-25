@@ -8,7 +8,7 @@ import torch.nn as nn
 
 # Load the model and tokenizer
 model = CoLT5(num_layers=6, dim=512).to('cuda')  # Adjust this if your architecture changes
-model.load_state_dict(torch.load('./checkpoints/colt5_epoch_1.pth'))
+model.load_state_dict(torch.load('./checkpoints_924/colt5_epoch_3.pth'))
 model.eval()  # Set the model to evaluation mode
 
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
