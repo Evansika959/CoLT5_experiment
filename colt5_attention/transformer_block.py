@@ -962,9 +962,11 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         should_route_q = q.shape[-2] > num_heavy_tokens_q
         should_route_kv = kv.shape[-2] > num_heavy_tokens_kv
 
-        indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(q, num_tokens = num_heavy_tokens_q, mask = q_mask, random_route = random_route)
+        if should_route_q: 
+            indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(q, num_tokens = num_heavy_tokens_q, mask = q_mask, random_route = random_route)
 
-        indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(kv, num_tokens = num_heavy_tokens_kv, mask = kv_mask, random_route = random_route)
+        if should_route_kv:
+            indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(kv, num_tokens = num_heavy_tokens_kv, mask = kv_mask, random_route = random_route)
 
         # get rotary embeddings if specified
 
