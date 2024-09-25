@@ -920,6 +920,7 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         # light local attention sees all tokens in a limited context
 
         light_out = self.light_attn(x)
+        print("light out shape:", light_out.shape)
 
         # pad sequence to multiple of the heavy window size
         # routing will take place within each heavy window block size
@@ -999,6 +1000,8 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
             normalized_scores_kv = normalized_scores_kv,
             normalized_scores_q = normalized_scores_q if self.multiply_queries_by_score else None
         )
+
+        print("heavy out shape:", routed_tokens_out.shape)
 
         if exists(indices_q):
             routed_tokens_out = routed_tokens_out * rearrange(normalized_scores_q, '... -> ... 1')
