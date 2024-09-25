@@ -134,8 +134,6 @@ class CoLT5(nn.Module):
         
         device = input_ids.device
         batch_size = input_ids.size(0)
-
-        print("batch_size", batch_size)
         
         # Define the maximum decoder sequence length
         decoder_max_length = 512  # Adjust based on your model's requirements
