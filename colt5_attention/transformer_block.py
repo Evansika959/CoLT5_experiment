@@ -932,6 +932,7 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         *,
         num_heavy_tokens_q = None,
         num_heavy_tokens_kv = None,
+        keep_routing_history = False,
         random_route = False
     ):
         batch, seq, device = *x.shape[:2], x.device
@@ -985,10 +986,10 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         should_route_kv = kv.shape[-2] > num_heavy_tokens_kv
 
         if should_route_q: 
-            indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(q, num_tokens = num_heavy_tokens_q, mask = q_mask, random_route = random_route)
+            indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(q, num_tokens = num_heavy_tokens_q, mask = q_mask, random_route = random_route, keep_history=keep_routing_history)
 
         if should_route_kv:
-            indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(kv, num_tokens = num_heavy_tokens_kv, mask = kv_mask, random_route = random_route)
+            indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(kv, num_tokens = num_heavy_tokens_kv, mask = kv_mask, random_route = random_route, keep_history=keep_routing_history)
 
         # get rotary embeddings if specified
 
@@ -1111,6 +1112,7 @@ class ConditionalRoutedCrossAttention(nn.Module):
         num_tokens_q = None,
         num_tokens_kv = None,
         mask = None,
+        keep_routing_history = False,
         context_mask = None
     ):
         batch, device = x.shape[0], x.device
@@ -1120,7 +1122,7 @@ class ConditionalRoutedCrossAttention(nn.Module):
         query_length = x.shape[-2]
         num_tokens_q = default(num_tokens_q, self.num_tokens_q)
 
-        indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(x, num_tokens = num_tokens_q, mask = mask)
+        indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(x, num_tokens = num_tokens_q, mask = mask, keep_history=keep_routing_history)
 
         # route the long contexts
 
@@ -1135,7 +1137,7 @@ class ConditionalRoutedCrossAttention(nn.Module):
         should_route_queries = key_value_length > num_tokens_q
 
         if should_route_kv:
-            indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(context, num_tokens = num_tokens_kv, mask = context_mask)
+            indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(context, num_tokens = num_tokens_kv, mask = context_mask, keep_history=keep_routing_history)
 
         # do the heavier branch with only routed tokens
 
@@ -1230,10 +1232,11 @@ class ConditionalRoutedTransformerBlock(nn.Module):
         mask = None,
         num_heavy_attn_tokens_q = None,
         num_heavy_attn_tokens_kv = None,
+        keep_routing_history = False,
         num_heavy_ff_tokens = None
     ):
-        x = self.conditional_attn(x, mask = mask, num_heavy_tokens_q = num_heavy_attn_tokens_q, num_heavy_tokens_kv = num_heavy_attn_tokens_kv) + x
-        x = self.conditional_ff(x, num_heavy_tokens = num_heavy_ff_tokens) + x
+        x = self.conditional_attn(x, mask = mask, num_heavy_tokens_q = num_heavy_attn_tokens_q, num_heavy_tokens_kv = num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
+        x = self.conditional_ff(x, num_heavy_tokens = num_heavy_ff_tokens, keep_routing_history=keep_routing_history) + x
         return x
 
 # block for decoder (with cross attention)
@@ -1316,13 +1319,14 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         context_mask = None,
         num_heavy_attn_tokens_q = None,
         num_heavy_attn_tokens_kv = None,
+        keep_routing_history = False,
         num_heavy_ff_tokens = None
     ):
         # Self-attention within the decoder block
-        x = self.conditional_self_auto_regressive_attn(x, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv) + x
+        x = self.conditional_self_auto_regressive_attn(x, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
         
         # Cross-attention with encoder hidden states
-        x = self.conditional_cross_attn(x, context=encoder_hidden_states, context_mask=context_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv) + x
+        x = self.conditional_cross_attn(x, context=encoder_hidden_states, context_mask=context_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
         
         # Feedforward network
         x = self.conditional_ff(x, num_heavy_tokens=num_heavy_ff_tokens) + x

@@ -15,10 +15,10 @@ class CoLT5Encoder(nn.Module):
         self.layers = nn.ModuleList([ConditionalRoutedTransformerBlock(dim, num_heavy_attn_tokens_kv=num_heavy_tokens, num_heavy_attn_tokens_q=num_heavy_tokens, num_heavy_ff_tokens=num_heavy_tokens) for _ in range(num_layers)])
         self.embed_tokens = nn.Embedding(32128, dim)  # Vocab size of 32,128 tokens
 
-    def forward(self, input_ids, mask=None):
+    def forward(self, input_ids, mask=None, keep_routing_history=False):
         x = self.embed_tokens(input_ids)
         for layer in self.layers:
-            x = layer(x, mask)
+            x = layer(x, mask, keep_routing_history=keep_routing_history)
         return x
 
 
@@ -29,10 +29,10 @@ class CoLT5Decoder(nn.Module):
         self.layers = nn.ModuleList([ConditionalRoutedDecoderBlock(dim, num_heavy_attn_tokens_kv=num_heavy_tokens, num_heavy_attn_tokens_q=num_heavy_tokens, num_heavy_ff_tokens=num_heavy_tokens) for _ in range(num_layers)])
         self.embed_tokens = nn.Embedding(32128, dim)  # Vocab size of 32,128 tokens
 
-    def forward(self, input_ids, encoder_hidden_states, mask=None):
+    def forward(self, input_ids, encoder_hidden_states, mask=None, keep_routing_history=False):
         x = self.embed_tokens(input_ids)
         for layer in self.layers:
-            x = layer(x, encoder_hidden_states, mask)
+            x = layer(x, encoder_hidden_states, mask, keep_routing_history=keep_routing_history)
         return x
 
 
@@ -45,11 +45,11 @@ class CoLT5(nn.Module):
         self.lm_head = nn.Linear(dim, 32128)  # Output layer to vocab size
         self.tokenizer = T5Tokenizer.from_pretrained('t5-small')
 
-    def forward(self, input_ids, decoder_input_ids, mask=None, decoder_mask=None):
+    def forward(self, input_ids, decoder_input_ids, mask=None, decoder_mask=None, keep_routing_history=False):
         # Encode the input
-        encoder_hidden_states = self.encoder(input_ids, mask=mask)
+        encoder_hidden_states = self.encoder(input_ids, mask=mask, keep_routing_history=keep_routing_history)
         # Decode the input
-        decoder_hidden_states = self.decoder(decoder_input_ids, encoder_hidden_states=encoder_hidden_states, mask=mask)
+        decoder_hidden_states = self.decoder(decoder_input_ids, encoder_hidden_states=encoder_hidden_states, mask=mask, keep_routing_history=keep_routing_history)
         # Generate final token predictions
         logits = self.lm_head(decoder_hidden_states)
         return logits
@@ -114,7 +114,7 @@ class CoLT5(nn.Module):
 
     #     return decoder_input_ids
 
-    def generate(self, input_ids, encoder_mask, max_new_tokens, temperature=1.0, top_k=None, verbose=False):
+    def generate(self, input_ids, encoder_mask, max_new_tokens, temperature=1.0, top_k=None, verbose=False, keep_routing_history=False):
         """
         Generate text from the CoLT5 model while maintaining a fixed decoder sequence length.
 
@@ -154,7 +154,7 @@ class CoLT5(nn.Module):
         for _ in range(max_new_tokens):
             # Forward pass through the model
             with torch.no_grad():
-                logits = self(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=encoder_mask)
+                logits = self(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=encoder_mask, keep_routing_history=keep_routing_history)
             
             # Get the logits for the last non-PAD token in each sequence
             # Find the first PAD position per batch
