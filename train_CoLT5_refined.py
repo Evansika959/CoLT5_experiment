@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, random_split, TensorDataset
+from torch.utils.data import DataLoader, random_split
 from datasets import load_dataset
 from transformers import T5Tokenizer, DataCollatorWithPadding
 from colt5_attention.transformer_block import ConditionalRoutedTransformerBlock, ConditionalRoutedDecoderBlock
@@ -8,7 +8,6 @@ from colt5_attention.colt5_model import CoLT5
 from tqdm import tqdm
 import os
 import matplotlib.pyplot as plt  # For plotting loss curves
-from torch.cuda.amp import GradScaler, autocast  # For mixed precision
 
 # ============================
 # 1. Data Loading and Preprocessing
@@ -82,7 +81,7 @@ model = CoLT5(num_layers=6, dim=512).to('cuda')
 # ============================
 
 # Define Optimizer and Scheduler
-optimizer = torch.optim.AdamW(model.parameters(), lr=3e-5)
+optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, verbose=True)
 
 # Define Loss Function
@@ -97,17 +96,16 @@ if not os.path.exists(checkpoint_dir):
 train_losses = []
 val_losses = []
 
-# Initialize GradScaler for Mixed Precision
-scaler = GradScaler()
-
-# ============================
-# 5. Training Loop with Validation
-# ============================
-
-epochs = 5  # Increased number of epochs for better convergence
-patience = 2  # For early stopping
+# Early Stopping Parameters
+patience = 3
 best_val_loss = float('inf')
 counter = 0
+
+# ============================
+# 5. Training Loop with Validation and Loss Tracking
+# ============================
+
+epochs = 10  # Increased number of epochs for better convergence
 
 for epoch in range(epochs):
     # Training Phase
@@ -126,23 +124,20 @@ for epoch in range(epochs):
 
         optimizer.zero_grad()
 
-        with autocast():
-            # Forward pass
-            logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask)
+        # Forward pass
+        logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask)
 
-            # Compute loss
-            loss = loss_fn(logits.view(-1, logits.size(-1)), labels.view(-1))
+        # Compute loss
+        loss = loss_fn(logits.view(-1, logits.size(-1)), labels.view(-1))
 
-        # Backward pass with scaled loss
-        scaler.scale(loss).backward()
+        # Backward pass
+        loss.backward()
 
-        # Gradient Clipping
-        scaler.unscale_(optimizer)
+        # Gradient Clipping (optional but recommended)
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
         # Optimizer step
-        scaler.step(optimizer)
-        scaler.update()
+        optimizer.step()
 
         # Accumulate loss
         epoch_train_loss += loss.item()
@@ -204,7 +199,7 @@ for epoch in range(epochs):
 # 6. Save the Final Model
 # ============================
 
-# Save the model
+# Save the final model
 model.save_pretrained('./colt5_triviaqa_model')
 
 # ============================
