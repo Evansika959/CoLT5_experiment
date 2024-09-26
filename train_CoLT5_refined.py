@@ -24,7 +24,7 @@ def preprocess_function(examples):
     inputs = [f"trivia question: {question}" for question in examples['question']]
     model_inputs = tokenizer(
         inputs,
-        max_length=512,
+        max_length=128,
         truncation=True,
         padding='max_length',
         return_tensors='pt'
@@ -34,7 +34,7 @@ def preprocess_function(examples):
     answers = [answer['value'] if len(answer['value']) > 0 else "" for answer in examples['answer']]
     labels = tokenizer(
         answers,
-        max_length=512,
+        max_length=128,
         truncation=True,
         padding='max_length',
         return_tensors='pt'
@@ -66,8 +66,8 @@ train_dataset, val_dataset = random_split(tokenized_dataset, [train_size, val_si
 data_collator = DataCollatorWithPadding(tokenizer, padding=True)
 
 # Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, collate_fn=data_collator)
-val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, collate_fn=data_collator)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, collate_fn=data_collator)
+val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, collate_fn=data_collator)
 
 # ============================
 # 3. Model Initialization
