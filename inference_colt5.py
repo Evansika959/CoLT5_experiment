@@ -36,7 +36,9 @@ labels_tokens = tokenizer(labels, return_tensors='pt', padding='max_length', tru
 
 # Print the sample question and expected answer
 print(f"Sample Question: {sample_question}")
+print(f"Question Tokenized: {input_ids}")
 print(f"Expected Answer: {labels}")
+print(f"Answer Tokenized: {labels_tokens}")
 
 # Generate the answer
 predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=128, temperature=1.0, top_k=None)
