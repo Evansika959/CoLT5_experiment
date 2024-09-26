@@ -342,10 +342,25 @@ class CoordinateDescentRouter(nn.Module):
         self.cosine_sim_routing = cosine_sim_routing
         self.cosine_sim_scale = cosine_sim_scale
 
+        # Initialize routing history storage
+        self.routing_history = {
+            'selected_indices': [],
+            'selected_scores': []
+        }
+
     def route_back(self, src, routed_tokens, indices):
         batch_range = create_batch_range(routed_tokens)
         src[batch_range, indices] = routed_tokens
         return src
+    
+    def clear_routing_history(self):
+        """
+        Clears the stored routing history. Call this method before starting a new evaluation to reset the history.
+        """
+        self.routing_history = {
+            'selected_indices': [],
+            'selected_scores': []
+        }
 
     def forward(
         self,
@@ -354,6 +369,7 @@ class CoordinateDescentRouter(nn.Module):
         num_tokens,
         mask = None,
         random_route = False,
+        keep_history = False,
         routing_tokens = None,
         keep_one_route_dim = False  # if only one route, whether to keepdim
     ):
@@ -487,6 +503,10 @@ class CoordinateDescentRouter(nn.Module):
 
         # return indices, scores, routed tokens and mask
 
+        if keep_history:
+            self.routing_history['selected_indices'].append(selected_indices)
+            self.routing_history['selected_scores'].append(selected_scores)
+
         return RouterReturn(selected_indices, selected_scores, routed_tokens, routed_mask)
 
 # main classes
@@ -522,7 +542,8 @@ class ConditionalRoutedFeedForward(nn.Module):
         self,
         x,
         mask = None,
-        num_heavy_tokens = None
+        num_heavy_tokens = None,
+        keep_routing_history = False
     ):
         device, num_heavy_tokens = x.device, default(num_heavy_tokens, self.num_heavy_tokens)
 
@@ -532,7 +553,7 @@ class ConditionalRoutedFeedForward(nn.Module):
 
         # route tokens appropriately for heavy branch
 
-        indices, normalized_scores, routed_tokens, _ = self.router(x, num_tokens = num_heavy_tokens, mask = mask)
+        indices, normalized_scores, routed_tokens, _ = self.router(x, num_tokens = num_heavy_tokens, mask = mask, keep_history = keep_routing_history)
 
         # do the heavier branch with only routed tokens
 
@@ -634,6 +655,7 @@ class ConditionalRoutedAttention(nn.Module):
         *,
         num_heavy_tokens_q = None,
         num_heavy_tokens_kv = None,
+        keep_routing_history = False,
         mask = None
     ):
         batch, seq, device = *x.shape[:2], x.device
@@ -650,8 +672,8 @@ class ConditionalRoutedAttention(nn.Module):
 
         # route tokens appropriately for heavy branch
 
-        indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(x, num_tokens = num_heavy_tokens_q, mask = mask)
-        indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(x, num_tokens = num_heavy_tokens_kv, mask = mask)
+        indices_q, normalized_scores_q, routed_tokens_q, _ = self.q_router(x, num_tokens = num_heavy_tokens_q, mask = mask, keep_history = keep_routing_history)
+        indices_kv, normalized_scores_kv, routed_tokens_kv, routed_tokens_kv_mask = self.kv_router(x, num_tokens = num_heavy_tokens_kv, mask = mask, keep_history = keep_routing_history)
 
         # get rotary embeddings if specified
 
