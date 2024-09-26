@@ -24,7 +24,7 @@ def preprocess_function(examples):
     inputs = [f"trivia question: {question}" for question in examples['question']]
     model_inputs = tokenizer(
         inputs,
-        max_length=64,
+        max_length=512,
         truncation=True,
         padding='max_length',
         return_tensors='pt'
@@ -34,7 +34,7 @@ def preprocess_function(examples):
     answers = [answer['value'] if len(answer['value']) > 0 else "" for answer in examples['answer']]
     labels = tokenizer(
         answers,
-        max_length=64,
+        max_length=512,
         truncation=True,
         padding='max_length',
         return_tensors='pt'
