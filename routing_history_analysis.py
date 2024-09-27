@@ -58,14 +58,9 @@ def compare_similarity_per_batch(layer_num, router_histories):
         selected_kv = set([idx for sample in selected_kv_batch for idx in sample])
         selected_ffn = set([idx for sample in selected_ffn_batch for idx in sample])
         
-        # Compute Jaccard Similarity
         intersection = selected_kv.intersection(selected_ffn)
-        union = selected_kv.union(selected_ffn)
-        
-        if not union:
-            similarity = 0.0
-        else:
-            similarity = len(intersection) / len(union)
+       
+        similarity = len(intersection) / len(selected_kv)
         
         similarity_scores.append(similarity)
     
