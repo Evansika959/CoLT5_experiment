@@ -61,6 +61,8 @@ def compare_similarity_per_batch(layer_num, router_histories):
         sum_similarity = 0
         tier0 = 0
         tier1 = 0
+        tier2 = 0
+        tier3 = 0
         for batch_idx in range(len(selected_kv_batch)):
             selected_kv = selected_kv_batch[batch_idx]
             selected_ffn = selected_ffn_batch[batch_idx]
@@ -79,6 +81,12 @@ def compare_similarity_per_batch(layer_num, router_histories):
 
             sum_similarity += similarity
 
+            if similarity == 0.25:
+                tier3 += 1
+
+            if similarity == 0.5:
+                tier2 += 1
+
             if similarity == 0.75:
                 tier1 += 1
 
@@ -88,6 +96,8 @@ def compare_similarity_per_batch(layer_num, router_histories):
         similarity_scores.append(sum_similarity / len(selected_kv_batch))
         print("tier0: ", tier0)
         print("tier1: ", tier1)
+        print("tier2: ", tier2)
+        print("tier3: ", tier3)
         print("similarity: ", sum_similarity / len(selected_kv_batch))
     
     return similarity_scores
