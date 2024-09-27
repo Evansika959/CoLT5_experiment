@@ -6,7 +6,7 @@ from transformers import T5Tokenizer
 
 # Define the CoLT5 Encoder
 
-seq_len = 64
+seq_len = 128
 num_heavy_tokens = 4
 
 class CoLT5Encoder(nn.Module):
@@ -136,7 +136,7 @@ class CoLT5(nn.Module):
         batch_size = input_ids.size(0)
         
         # Define the maximum decoder sequence length
-        decoder_max_length = 64  # Adjust based on your model's requirements
+        decoder_max_length = 128  # Adjust based on your model's requirements
         
         # Initialize decoder input with PAD tokens
         decoder_input_ids = torch.full((batch_size, decoder_max_length), self.tokenizer.pad_token_id, dtype=torch.long).to(device)
