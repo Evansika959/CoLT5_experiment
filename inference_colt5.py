@@ -83,6 +83,15 @@ print(f"Predicted Answer: {generated_text}")
 print(f"Predicted Answer Tokenized: {generated_ids}")
 
 # Assuming 'model' is your CoLT5 model instance and routing history has been kept during training/inference
+def compare_similarity(router_name):
+    kv_router = ".conditional_attn.kv_router"
+    ffn_router = ".conditional_ff.router"
+    selected_kv = router_histories[router_name+kv_router]['selected_indices'][0]
+    selected_ffn = router_histories[router_name+ffn_router]['selected_indices'][0]
+    common_indices = set(selected_kv).intersection(selected_ffn)
+    similarity = len(common_indices) / len(kv_router)
+    return similarity
 
+print(f"Similarity between KV and FFN routers: {compare_similarity('model.encoder.layers.3')}")
 
 
