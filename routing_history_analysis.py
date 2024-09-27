@@ -135,7 +135,8 @@ def main():
         print(f"\nProcessing Layer {layer}...")
         similarity_scores = compare_similarity_per_batch(layer, router_histories)
         layer_similarity[layer] = similarity_scores
-        print(f"Completed Layer {layer}: {len(similarity_scores)} batches compared.")
+        print(f"Completed Layer {layer}: {len(similarity_scores)} data_loads compared.")
+        print(f"Average Similarity: {sum(similarity_scores) / len(similarity_scores):.4f}")
     
     # Example: Plot histogram for each layer
     for layer, scores in layer_similarity.items():
