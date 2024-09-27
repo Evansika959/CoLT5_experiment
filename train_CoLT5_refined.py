@@ -201,7 +201,7 @@ for epoch in range(epochs):
 # ============================
 
 # Save the final model
-model.save_pretrained('./colt5_triviaqa_model')
+# model.save_pretrained('./colt5_triviaqa_model')
 
 # ============================
 # 7. Plotting the Loss Curves
