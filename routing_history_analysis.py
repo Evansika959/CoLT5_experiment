@@ -58,16 +58,20 @@ def compare_similarity_per_batch(layer_num, router_histories, batchsize=64):
         
 
         for batch_idx in range(batchsize):
-            selected_kv = selected_kv_batch[batch_idx].tolist()
-            selected_ffn = selected_ffn_batch[batch_idx].tolist()
+            selected_kv = selected_kv_batch[batch_idx]
+            selected_ffn = selected_ffn_batch[batch_idx]
+
+            # Convert tensors to Python sets for set operations
+            selected_kv_set = set(selected_kv.tolist())
+            selected_ffn_set = set(selected_ffn.tolist())
 
             if data_idx == 1 and batch_idx == 1:
                 print(selected_kv)
                 print(selected_ffn)
 
-            intersection = selected_kv.intersection(selected_ffn)
+            intersection = selected_kv_set.intersection(selected_ffn_set)
         
-            similarity = len(intersection) / len(selected_kv)
+            similarity = len(intersection) / len(selected_kv_set)
 
             if similarity > 0.5:
                 print(selected_ffn,selected_kv,batch_idx,data_idx)
