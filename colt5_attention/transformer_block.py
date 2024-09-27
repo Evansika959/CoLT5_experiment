@@ -1062,6 +1062,8 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
 
         heavy_out = F.pad(heavy_out, (0, 0, window_size, 0), value = 0.)
 
+        print(light_out.shape, heavy_out.shape)
+
         # sum light and heavy branches
         return light_out + heavy_out
 
