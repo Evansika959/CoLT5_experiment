@@ -82,7 +82,7 @@ model.load_state_dict(torch.load('./checkpoints_926/best_colt5.pth'))
 # ============================
 
 # Define Optimizer and Scheduler
-optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
+optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, verbose=True)
 
 # Define Loss Function

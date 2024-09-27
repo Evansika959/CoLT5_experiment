@@ -17,7 +17,7 @@ def load_routing_history(file_path='routing_history.pkl'):
         routing_history = pickle.load(f)
     return routing_history
 
-def compare_similarity_per_batch(layer_num, router_histories):
+def compare_similarity_per_batch(layer_num, router_histories, batchsize=64):
     """
     Compares the similarity between ff.router and kv.router for each batch in a specific encoder layer.
 
@@ -43,32 +43,34 @@ def compare_similarity_per_batch(layer_num, router_histories):
     if len(kv_history) != len(ffn_history):
         print(f"Warning: Mismatch in number of batches for layer {layer_num}.")
     
-    num_batches = min(len(kv_history), len(ffn_history))
+    num_data = min(len(kv_history), len(ffn_history))
+
+    print("data length: ", num_data)
     
     similarity_scores = []
     
-    for batch_idx in tqdm(range(num_batches), desc=f"Comparing Layer {layer_num} Batches"):
+    for data_idx in tqdm(range(num_data), desc=f"Comparing Layer {layer_num} Batches"):
         # Each history entry is a list of selected indices per sample in the batch
         # e.g., [[1, 2, 3, 4], [5,6,7,8], ...] for batch_size samples
         
-        selected_kv_batch = kv_history[batch_idx]  # List of lists
-        selected_ffn_batch = ffn_history[batch_idx]  # List of lists
-
-        if batch_idx == 1:
-            print(selected_kv_batch)
-            print(selected_ffn_batch)
+        selected_kv_batch = kv_history[data_idx]  # List of lists
+        selected_ffn_batch = ffn_history[data_idx]  # List of lists
         
-        # Flatten the lists to get all selected indices in the batch
-        selected_kv = set([idx for sample in selected_kv_batch for idx in sample])
-        selected_ffn = set([idx for sample in selected_ffn_batch for idx in sample])
-        
-        intersection = selected_kv.intersection(selected_ffn)
-       
-        similarity = len(intersection) / len(selected_kv)
 
-        if batch_idx == 1:
-            print(intersection)
-            print(similarity)
+        for batch_idx in range(batchsize):
+            selected_kv = selected_kv_batch[batch_idx]
+            selected_ffn = selected_ffn_batch[batch_idx]
+
+            if data_idx == 1 and batch_idx == 1:
+                print(selected_kv)
+                print(selected_ffn)
+
+            intersection = selected_kv.intersection(selected_ffn)
+        
+            similarity = len(intersection) / len(selected_kv)
+
+            if similarity > 0.5:
+                print(selected_ffn,selected_kv,batch_idx,data_idx)
         
         similarity_scores.append(similarity)
     
