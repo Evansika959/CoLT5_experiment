@@ -46,7 +46,7 @@ def compare_similarity_per_batch(layer_num, router_histories):
     
     num_data = min(len(kv_history), len(ffn_history))
 
-    print("data length: ", num_data)
+    # print("data length: ", num_data)
     
     similarity_scores = []
     
@@ -62,8 +62,6 @@ def compare_similarity_per_batch(layer_num, router_histories):
         selected_kv_batch = kv_history[data_idx]  # List of lists
         selected_ffn_batch = ffn_history[data_idx]  # List of lists
         
-        print("batch length: ", len(selected_kv_batch))
-
         sum_similarity = 0
         tier0 = 0
         tier1 = 0
