@@ -81,8 +81,6 @@ for router_name, history in router_histories.items():
 # Print the results
 print(f"Predicted Answer: {generated_text}")
 print(f"Predicted Answer Tokenized: {generated_ids}")
-print(f"mask: {attention_mask}")
-print(f"Generated Tokens: {generated_ids}")
 
 # Assuming 'model' is your CoLT5 model instance and routing history has been kept during training/inference
 
