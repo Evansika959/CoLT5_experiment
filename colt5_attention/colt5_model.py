@@ -29,10 +29,10 @@ class CoLT5Decoder(nn.Module):
         self.layers = nn.ModuleList([ConditionalRoutedDecoderBlock(dim, num_heavy_attn_tokens_kv=num_heavy_tokens, num_heavy_attn_tokens_q=num_heavy_tokens, num_heavy_ff_tokens=num_heavy_tokens) for _ in range(num_layers)])
         self.embed_tokens = nn.Embedding(32128, dim)  # Vocab size of 32,128 tokens
 
-    def forward(self, input_ids, encoder_hidden_states, mask=None, keep_routing_history=False):
+    def forward(self, input_ids, encoder_hidden_states, mask=None, decoder_mask=None, keep_routing_history=False):
         x = self.embed_tokens(input_ids)
         for layer in self.layers:
-            x = layer(x, encoder_hidden_states, mask, keep_routing_history=keep_routing_history)
+            x = layer(x, encoder_hidden_states, mask=mask, decoder_mask=decoder_mask, keep_routing_history=keep_routing_history)
         return x
 
 
