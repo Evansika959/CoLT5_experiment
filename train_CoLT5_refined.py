@@ -128,10 +128,6 @@ for epoch in range(epochs):
         decoder_mask[:,0] = True
         decoder_mask = decoder_mask.to('cuda')
 
-        torch.set_printoptions(profile="full")
-        print(decoder_input_ids)
-        print(decoder_mask)
-
         optimizer.zero_grad()
 
         # Forward pass
