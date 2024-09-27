@@ -49,6 +49,11 @@ def compare_similarity_per_batch(layer_num, router_histories):
     
     similarity_scores = []
     
+    tier0_ratio = []
+    tier1_ratio = []
+    tier2_ratio = []
+    tier3_ratio = []
+
     for data_idx in tqdm(range(num_data), desc=f"Comparing Layer {layer_num} Batches"):
         # Each history entry is a list of selected indices per sample in the batch
         # e.g., [[1, 2, 3, 4], [5,6,7,8], ...] for batch_size samples
@@ -63,6 +68,7 @@ def compare_similarity_per_batch(layer_num, router_histories):
         tier1 = 0
         tier2 = 0
         tier3 = 0
+
         for batch_idx in range(len(selected_kv_batch)):
             selected_kv = selected_kv_batch[batch_idx]
             selected_ffn = selected_ffn_batch[batch_idx]
@@ -99,7 +105,17 @@ def compare_similarity_per_batch(layer_num, router_histories):
         print("tier2: ", tier2)
         print("tier3: ", tier3)
         print("similarity: ", sum_similarity / len(selected_kv_batch))
-    
+
+        tier0_ratio.append(tier0/len(selected_kv_batch))
+        tier1_ratio.append(tier1/len(selected_kv_batch))
+        tier2_ratio.append(tier2/len(selected_kv_batch))
+        tier3_ratio.append(tier3/len(selected_kv_batch))
+
+    print("tier0_ratio: ", sum(tier0_ratio) / len(tier0_ratio))
+    print("tier1_ratio: ", sum(tier1_ratio) / len(tier1_ratio))
+    print("tier2_ratio: ", sum(tier2_ratio) / len(tier2_ratio))
+    print("tier3_ratio: ", sum(tier3_ratio) / len(tier3_ratio))
+
     return similarity_scores
 
 def plot_similarity_histogram(similarity_scores, layer_num):
