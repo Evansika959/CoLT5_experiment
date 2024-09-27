@@ -7,7 +7,7 @@ from transformers import T5Tokenizer
 # Define the CoLT5 Encoder
 
 seq_len = 128
-num_heavy_tokens = 4
+num_heavy_tokens = 8
 
 class CoLT5Encoder(nn.Module):
     def __init__(self, num_layers, dim):
