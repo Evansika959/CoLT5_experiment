@@ -75,7 +75,7 @@ val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, collate_fn=da
 
 # Load CoLT5 model
 model = CoLT5(num_layers=6, dim=512).to('cuda')
-model.load_state_dict(torch.load('./checkpoints_925/best_colt5.pth'))
+model.load_state_dict(torch.load('./checkpoints_926/best_colt5.pth'))
 
 # ============================
 # 4. Training Setup
@@ -89,7 +89,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', fa
 loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
 
 # Directory for checkpoints
-checkpoint_dir = './checkpoints_926'
+checkpoint_dir = './checkpoints_927'
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
 
