@@ -2,6 +2,7 @@ import pickle
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import numpy as np
 
 def load_routing_history(file_path='routing_history.pkl'):
     """
@@ -116,26 +117,51 @@ def compare_similarity_per_batch(layer_num, router_histories):
     print("tier2_ratio: ", sum(tier2_ratio) / len(tier2_ratio))
     print("tier3_ratio: ", sum(tier3_ratio) / len(tier3_ratio))
 
-
+    tier0_ratio_avg = sum(tier0_ratio) / len(tier0_ratio)
+    tier1_ratio_avg = sum(tier1_ratio) / len(tier1_ratio)
+    tier2_ratio_avg = sum(tier2_ratio) / len(tier2_ratio)
+    tier3_ratio_avg = sum(tier3_ratio) / len(tier3_ratio)
 
     return similarity_scores
+
+def plot_distribution_bar(tier0_ratio, tier1_ratio, tier2_ratio, tier3_ratio, layernum):
+    plt.figure(figsize=(10, 6))
+    
+    # Generate the x-axis positions (layer numbers)
+    layers = np.arange(layernum)
+    
+    # Plot stacked bars
+    plt.bar(layers, tier0_ratio, label='Tier 0', color='skyblue', edgecolor='black', alpha=0.7)
+    plt.bar(layers, tier1_ratio, bottom=tier0_ratio, label='Tier 1', color='lightgreen', edgecolor='black', alpha=0.7)
+    plt.bar(layers, tier2_ratio, bottom=np.array(tier0_ratio) + np.array(tier1_ratio), label='Tier 2', color='lightcoral', edgecolor='black', alpha=0.7)
+    plt.bar(layers, tier3_ratio, bottom=np.array(tier0_ratio) + np.array(tier1_ratio) + np.array(tier2_ratio), label='Tier 3', color='lightgoldenrodyellow', edgecolor='black', alpha=0.7)
+
+    # Add labels and title
+    plt.xlabel('Layer Number')
+    plt.ylabel('Tier Ratio')
+    plt.title('Stacked Bar Chart of Tier Ratios per Layer')
+
+    # Add x-ticks for layer numbers
+    plt.xticks(layers)
+
+    # Add legend
+    plt.legend()
+
+    # Save the plot
+    plt.savefig("routing_analysis_stacked_bar.png")
 
 def plot_similarity_histogram(similarity_scores):
     plt.figure(figsize=(10, 6))
     
     # Plot a histogram of similarity scores
-    plt.hist(similarity_scores, bins=20, color='skyblue', edgecolor='black', alpha=0.7)
+    plt.bar(range(len(similarity_scores)), similarity_scores, color='skyblue', edgecolor='black', alpha=0.7)
     
     # Add labels and title
-    plt.xlabel('Similarity Score')
-    plt.ylabel('Frequency')
+    plt.xlabel('Layer Number')
+    plt.ylabel('similarity')
     plt.title('Histogram of Similarity Scores')
     
-    # Add a legend
-    blue_patch = mpatches.Patch(color='skyblue', label='Similarity Scores')
-    plt.legend(handles=[blue_patch])
-    
-    plt.savefig("routing_analysis_histogram.png")
+    plt.savefig("routing_analysis_bar.png")
 
 def plot_similarity_scores(layer_similarity):
     plt.figure(figsize=(10, 6))
@@ -145,7 +171,7 @@ def plot_similarity_scores(layer_similarity):
         plt.plot(scores, label=f'Layer {layer}')
     
     # Add labels and title
-    plt.xlabel('Layer Number')
+    plt.xlabel('DataLoad Number')
     plt.ylabel('Similarity Score')
     plt.title('Similarity Scores Across Different Layers')
     plt.legend()  # Show the legend
@@ -176,6 +202,7 @@ def main():
     
     plot_similarity_scores(layer_similarity)
     plot_similarity_histogram(layer_scores)
+    print(layer_scores)
     
     # Optionally, save the similarity scores for further analysis
     with open('layer_similarity_scores.pkl', 'wb') as f:
