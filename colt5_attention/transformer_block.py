@@ -967,6 +967,9 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         q_mask = torch.ones((batch, seq_len), dtype = torch.bool, device = device)
         q_mask = F.pad(q_mask, (0, padded_seq_len - seq_len), value = False)
 
+        print(x.shape, q_mask.shape)
+        print(x, seq_len)
+
         # handy function
 
         merge_to_batch = lambda t: rearrange(t, 'b n ... -> (b n) ...')
