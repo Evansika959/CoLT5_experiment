@@ -28,7 +28,7 @@ def extract_router_history(model):
 
 # Load the model and tokenizer
 model = CoLT5(num_layers=6, dim=512).to('cuda')
-model.load_state_dict(torch.load('./checkpoints_925/best_colt5.pth'))
+model.load_state_dict(torch.load('./checkpoints_926/best_colt5.pth'))
 model.eval()  # Set the model to evaluation mode
 
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
