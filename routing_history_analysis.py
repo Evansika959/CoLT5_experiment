@@ -116,7 +116,26 @@ def compare_similarity_per_batch(layer_num, router_histories):
     print("tier2_ratio: ", sum(tier2_ratio) / len(tier2_ratio))
     print("tier3_ratio: ", sum(tier3_ratio) / len(tier3_ratio))
 
+
+
     return similarity_scores
+
+def plot_similarity_histogram(similarity_scores):
+    plt.figure(figsize=(10, 6))
+    
+    # Plot a histogram of similarity scores
+    plt.hist(similarity_scores, bins=20, color='skyblue', edgecolor='black', alpha=0.7)
+    
+    # Add labels and title
+    plt.xlabel('Similarity Score')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of Similarity Scores')
+    
+    # Add a legend
+    blue_patch = mpatches.Patch(color='skyblue', label='Similarity Scores')
+    plt.legend(handles=[blue_patch])
+    
+    plt.savefig("routing_analysis_histogram.png")
 
 def plot_similarity_scores(layer_similarity):
     plt.figure(figsize=(10, 6))
@@ -144,6 +163,8 @@ def main():
     # Initialize a dictionary to store similarity scores per layer
     layer_similarity = {}
     
+    layer_scores = []
+
     # Compute similarity scores for each layer
     for layer in range(num_encoder_layers):
         print(f"\nProcessing Layer {layer}...")
@@ -151,8 +172,10 @@ def main():
         layer_similarity[layer] = similarity_scores
         print(f"Completed Layer {layer}: {len(similarity_scores)} data_loads compared.")
         print(f"Average Similarity: {sum(similarity_scores) / len(similarity_scores):.4f}")
+        layer_scores.append(sum(similarity_scores) / len(similarity_scores))
     
     plot_similarity_scores(layer_similarity)
+    plot_similarity_histogram(layer_scores)
     
     # Optionally, save the similarity scores for further analysis
     with open('layer_similarity_scores.pkl', 'wb') as f:
