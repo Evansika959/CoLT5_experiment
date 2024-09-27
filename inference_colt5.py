@@ -2,7 +2,8 @@ import torch
 import random
 from datasets import load_dataset
 from transformers import T5Tokenizer
-from colt5_attention.colt5_model import CoLT5, CoordinateDescentRouter
+from colt5_attention.colt5_model import CoLT5
+from colt5_attention.transformer_block import CoordinateDescentRouter
 
 import torch
 from collections import defaultdict
