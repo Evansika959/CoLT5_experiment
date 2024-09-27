@@ -163,9 +163,17 @@ for epoch in range(epochs):
             decoder_input_ids = torch.full((labels.size(0), labels.size(1)), tokenizer.pad_token_id, dtype=torch.long).to('cuda')
             decoder_input_ids[:, 1:] = labels[:, :-1]
             decoder_input_ids[:, 0] = tokenizer.pad_token_id
+             
+            decoder_mask = labels != tokenizer.pad_token_id
+            decoder_mask[:, 1:] = decoder_mask[:,:-1]
+            decoder_mask[:,0] = True
+            decoder_mask = decoder_mask.to('cuda')
+
+            print(labels)
+            print(decoder_mask)
 
             # Forward pass
-            logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask)
+            logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask, decoder_mask=decoder_mask)
 
             # Compute loss
             loss = loss_fn(logits.view(-1, logits.size(-1)), labels.view(-1))
