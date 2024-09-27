@@ -130,6 +130,7 @@ def plot_similarity_scores(layer_similarity):
     plt.ylabel('Similarity Score')
     plt.title('Similarity Scores Across Different Layers')
     plt.legend()  # Show the legend
+    plt.savefig('routing_analysis.png')
     # plt.show()
 
 def main():
