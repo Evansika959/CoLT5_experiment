@@ -63,7 +63,7 @@ print(f"Expected Answer: {labels}")
 # print(f"Answer Tokenized: {labels_tokens}")
 
 # Generate the answer
-predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=10, temperature=1.0, top_k=None, keep_routing_history=True, verbose=True)
+predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=10, temperature=1.0, top_k=None, keep_routing_history=True, verbose=False)
 
 generated_ids = predicted_answer[0].cpu().tolist()
 generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
@@ -74,7 +74,7 @@ router_histories = extract_router_history(model)
 # Display the routing histories
 for router_name, history in router_histories.items():
     print(f"Router: {router_name}")
-    print(f"Selected Indices: {history['selected_indices']}")
+    # print(f"Selected Indices: {history['selected_indices']}")
     # print(f"Selected Scores: {history['selected_scores']}")
     # print(f"mask: {history['input_mask']}")
 
