@@ -1254,7 +1254,7 @@ class ConditionalRoutedTransformerBlock(nn.Module):
         num_heavy_ff_tokens = None
     ):
         x = self.conditional_attn(x, mask = mask, num_heavy_tokens_q = num_heavy_attn_tokens_q, num_heavy_tokens_kv = num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
-        x = self.conditional_ff(x, num_heavy_tokens = num_heavy_ff_tokens, keep_routing_history=keep_routing_history) + x
+        x = self.conditional_ff(x, mask=mask, num_heavy_tokens = num_heavy_ff_tokens, keep_routing_history=keep_routing_history) + x
         return x
 
 # block for decoder (with cross attention)

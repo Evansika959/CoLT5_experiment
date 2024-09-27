@@ -18,7 +18,7 @@ class CoLT5Encoder(nn.Module):
     def forward(self, input_ids, mask=None, keep_routing_history=False):
         x = self.embed_tokens(input_ids)
         for layer in self.layers:
-            x = layer(x, mask, keep_routing_history=keep_routing_history)
+            x = layer(x, mask=mask, keep_routing_history=keep_routing_history)
         return x
 
 
