@@ -56,8 +56,9 @@ def compare_similarity_per_batch(layer_num, router_histories, batchsize=64):
         selected_kv_batch = kv_history[data_idx]  # List of lists
         selected_ffn_batch = ffn_history[data_idx]  # List of lists
         
+        print("batch length: ", len(selected_kv_batch))
 
-        for batch_idx in range(batchsize):
+        for batch_idx in range(len(selected_kv_batch)):
             selected_kv = selected_kv_batch[batch_idx]
             selected_ffn = selected_ffn_batch[batch_idx]
 
