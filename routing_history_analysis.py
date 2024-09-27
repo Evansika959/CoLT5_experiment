@@ -53,6 +53,10 @@ def compare_similarity_per_batch(layer_num, router_histories):
         
         selected_kv_batch = kv_history[batch_idx]  # List of lists
         selected_ffn_batch = ffn_history[batch_idx]  # List of lists
+
+        if batch_idx == 1:
+            print(selected_kv_batch)
+            print(selected_ffn_batch)
         
         # Flatten the lists to get all selected indices in the batch
         selected_kv = set([idx for sample in selected_kv_batch for idx in sample])
@@ -61,6 +65,10 @@ def compare_similarity_per_batch(layer_num, router_histories):
         intersection = selected_kv.intersection(selected_ffn)
        
         similarity = len(intersection) / len(selected_kv)
+
+        if batch_idx == 1:
+            print(intersection)
+            print(similarity)
         
         similarity_scores.append(similarity)
     
