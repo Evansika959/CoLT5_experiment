@@ -38,7 +38,9 @@ def compare_similarity_per_batch(layer_num, router_histories):
     
     # Retrieve routing histories
     kv_history = router_histories.get(kv_router_name, [])
+    print(kv_history)
     ffn_history = router_histories.get(ffn_router_name, [])
+    print(ffn_history)
     
     if len(kv_history) != len(ffn_history):
         print(f"Warning: Mismatch in number of batches for layer {layer_num}.")
@@ -51,8 +53,8 @@ def compare_similarity_per_batch(layer_num, router_histories):
         # Each history entry is a list of selected indices per sample in the batch
         # e.g., [[1, 2, 3, 4], [5,6,7,8], ...] for batch_size samples
         
-        selected_kv_batch = kv_history[batch_idx+1]  # List of lists
-        selected_ffn_batch = ffn_history[batch_idx+1]  # List of lists
+        selected_kv_batch = kv_history[batch_idx]  # List of lists
+        selected_ffn_batch = ffn_history[batch_idx]  # List of lists
         
         # Flatten the lists to get all selected indices in the batch
         selected_kv = set([idx for sample in selected_kv_batch for idx in sample])
