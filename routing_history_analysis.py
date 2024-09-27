@@ -118,21 +118,18 @@ def compare_similarity_per_batch(layer_num, router_histories):
 
     return similarity_scores
 
-def plot_similarity_histogram(similarity_scores, layer_num):
-    """
-    Plots a histogram of similarity scores for a specific layer.
-
-    Args:
-        similarity_scores (list): List of similarity scores.
-        layer_num (int): The encoder layer number.
-    """
-    plt.figure(figsize=(8, 6))
-    plt.hist(similarity_scores, bins=20, color='skyblue', edgecolor='black')
-    plt.xlabel('Jaccard Similarity')
-    plt.ylabel('Number of Batches')
-    plt.title(f'Similarity Distribution between KV and FFN Routers in Layer {layer_num}')
-    plt.grid(True)
-    plt.savefig('routing_analysis.png')  # Save the plot as an image file
+def plot_similarity_scores(layer_similarity):
+    plt.figure(figsize=(10, 6))
+    
+    # Plot similarity scores for each layer
+    for layer, scores in layer_similarity.items():
+        plt.plot(scores, label=f'Layer {layer}')
+    
+    # Add labels and title
+    plt.xlabel('Layer Number')
+    plt.ylabel('Similarity Score')
+    plt.title('Similarity Scores Across Different Layers')
+    plt.legend()  # Show the legend
     # plt.show()
 
 def main():
@@ -154,9 +151,7 @@ def main():
         print(f"Completed Layer {layer}: {len(similarity_scores)} data_loads compared.")
         print(f"Average Similarity: {sum(similarity_scores) / len(similarity_scores):.4f}")
     
-    # Example: Plot histogram for each layer
-    for layer, scores in layer_similarity.items():
-        plot_similarity_histogram(scores, layer)
+    plot_similarity_scores(layer_similarity)
     
     # Optionally, save the similarity scores for further analysis
     with open('layer_similarity_scores.pkl', 'wb') as f:
