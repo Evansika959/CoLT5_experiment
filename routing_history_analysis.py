@@ -38,9 +38,7 @@ def compare_similarity_per_batch(layer_num, router_histories):
     
     # Retrieve routing histories
     kv_history = router_histories[kv_router_name]['selected_indices']
-    print(kv_history)
     ffn_history = router_histories[ffn_router_name]['selected_indices']
-    print(ffn_history)
     
     if len(kv_history) != len(ffn_history):
         print(f"Warning: Mismatch in number of batches for layer {layer_num}.")
@@ -82,6 +80,7 @@ def plot_similarity_histogram(similarity_scores, layer_num):
     plt.ylabel('Number of Batches')
     plt.title(f'Similarity Distribution between KV and FFN Routers in Layer {layer_num}')
     plt.grid(True)
+    plt.savefig('routing_analysis.png')  # Save the plot as an image file
     # plt.show()
 
 def main():
