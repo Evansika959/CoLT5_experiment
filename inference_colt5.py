@@ -70,6 +70,8 @@ generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
 
 # Print the results
 print(f"Predicted Answer: {generated_text}")
+print(f"Predicted Answer Tokenized: {generated_ids}")
+print(f"mask: {attention_mask}")
 print(f"Generated Tokens: {generated_ids}")
 
 # Assuming 'model' is your CoLT5 model instance and routing history has been kept during training/inference
@@ -82,4 +84,5 @@ for router_name, history in router_histories.items():
     print(f"Router: {router_name}")
     print(f"Selected Indices: {history['selected_indices']}")
     print(f"Selected Scores: {history['selected_scores']}\n")
+    print(f"mask: {history['input_mask']}")
 
