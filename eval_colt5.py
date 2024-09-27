@@ -93,5 +93,5 @@ print(f"Average Test Loss: {average_loss}")
 router_histories = extract_router_history(model)
 
 for router_name, history in router_histories.items():
-    print(f"Router: {router_name, router_name.type}")
+    print(f"Router: {router_name}")
     print(f"Selected Indices: {history['selected_indices']}")
