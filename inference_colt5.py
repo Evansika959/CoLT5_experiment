@@ -68,7 +68,7 @@ predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask
 generated_ids = predicted_answer[0].cpu().tolist()
 generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
 
-# Extract routing histories
+# Extract the routing histories
 router_histories = extract_router_history(model)
 
 # Display the routing histories
