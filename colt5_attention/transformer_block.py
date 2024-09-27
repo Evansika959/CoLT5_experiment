@@ -359,7 +359,10 @@ class CoordinateDescentRouter(nn.Module):
         """
         self.routing_history = {
             'selected_indices': [],
-            'selected_scores': []
+            'selected_scores': [],
+            'routed_tokens': [],
+            'routed_mask': [],
+            'input_mask': []
         }
 
     def forward(
