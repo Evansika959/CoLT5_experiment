@@ -961,7 +961,7 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
 
         x, seq_len = pad_to_multiple(x, window_size, dim = -2)
         if (mask is not None):
-            seq_len = torch.sum(mask, dim=1)+1   #count the SOS token
+            seq_len = torch.sum(mask, dim=1)
             print(seq_len,mask)
 
         padded_seq_len = x.shape[-2]
@@ -1061,8 +1061,6 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         heavy_out = heavy_out[:, :(seq_len - window_size)]
 
         heavy_out = F.pad(heavy_out, (0, 0, window_size, 0), value = 0.)
-
-        print(light_out.shape, heavy_out.shape)
 
         # sum light and heavy branches
         return light_out + heavy_out

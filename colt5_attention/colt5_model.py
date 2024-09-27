@@ -150,6 +150,7 @@ class CoLT5(nn.Module):
 
         # Create a mask where the first 10 positions are True and the rest are False
         decoder_mask = torch.zeros((1, decoder_max_length), dtype=torch.bool).to('cuda')
+        decoder_mask[:, :1] = True
         current_allowed_tokens = 1
 
         # Keep track of the current generation step per batch
