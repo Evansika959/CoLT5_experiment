@@ -10,6 +10,7 @@ def inspect_routing_history(routing_history):
         print(f"Router: {router_name}")
         print(f"Type of history: {type(history)}")
         print(f"Number of batches: {len(history)}")
+        print(history)
         
 
 if __name__ == "__main__":
