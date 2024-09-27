@@ -63,7 +63,7 @@ print(f"Expected Answer: {labels}")
 # print(f"Answer Tokenized: {labels_tokens}")
 
 # Generate the answer
-predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=1, temperature=1.0, top_k=None, keep_routing_history=True)
+predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=1, temperature=1.0, top_k=None, keep_routing_history=True, verbose=True)
 
 generated_ids = predicted_answer[0].cpu().tolist()
 generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)

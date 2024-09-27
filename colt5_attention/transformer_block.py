@@ -958,7 +958,6 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
 
         window_size = self.heavy_window_size
 
-        print("before:",x)
         x, seq_len = pad_to_multiple(x, window_size, dim = -2)
 
         padded_seq_len = x.shape[-2]

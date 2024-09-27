@@ -136,7 +136,7 @@ class CoLT5(nn.Module):
         batch_size = input_ids.size(0)
         
         # Define the maximum decoder sequence length
-        decoder_max_length = 512  # Adjust based on your model's requirements
+        decoder_max_length = 64  # Adjust based on your model's requirements
         
         # Initialize decoder input with PAD tokens
         decoder_input_ids = torch.full((batch_size, decoder_max_length), self.tokenizer.pad_token_id, dtype=torch.long).to(device)
@@ -148,10 +148,14 @@ class CoLT5(nn.Module):
             # If no BOS token, you can leave it as PAD or use another starting token
             pass
 
+        # Create a mask where the first 10 positions are True and the rest are False
+        decoder_mask = torch.zeros((1, decoder_max_length), dtype=torch.bool).to('cuda')
+        current_allowed_tokens = 1
+
         # Keep track of the current generation step per batch
         generated_steps = torch.zeros(batch_size, dtype=torch.long).to(device)
         
-        for _ in range(max_new_tokens):
+        for step in range(max_new_tokens):
             # Forward pass through the model
             with torch.no_grad():
                 logits = self(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=encoder_mask, keep_routing_history=keep_routing_history)
@@ -199,6 +203,13 @@ class CoLT5(nn.Module):
             eos_mask = (next_token_id == self.tokenizer.eos_token_id)
             if eos_mask.all():
                 break
+
+            if current_allowed_tokens < decoder_max_length:
+                current_allowed_tokens += 1
+                decoder_mask[:, current_allowed_tokens - 1] = True  # Add one more True
+                
+                if verbose:
+                    print(f"Step {step + 1}: Allowed tokens up to position {current_allowed_tokens}")
             
             # Optionally, stop generating for individual batches that have generated EOS
             # This requires handling each batch separately, which is more complex
