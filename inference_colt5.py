@@ -2,7 +2,28 @@ import torch
 import random
 from datasets import load_dataset
 from transformers import T5Tokenizer
-from colt5_attention.colt5_model import CoLT5
+from colt5_attention.colt5_model import CoLT5, CoordinateDescentRouter
+
+import torch
+from collections import defaultdict
+
+def extract_router_history(model):
+    """
+    Extracts the routing history from all CoordinateDescentRouter instances within the model.
+
+    Args:
+        model (nn.Module): The CoLT5 model instance.
+
+    Returns:
+        dict: A dictionary where keys are router names (as per model's module hierarchy)
+              and values are their corresponding routing histories.
+    """
+    router_histories = {}
+    for name, module in model.named_modules():
+        if isinstance(module, CoordinateDescentRouter):
+            router_histories[name] = module.routing_history
+    return router_histories
+
 
 # Load the model and tokenizer
 model = CoLT5(num_layers=6, dim=512).to('cuda')
@@ -41,7 +62,7 @@ print(f"Expected Answer: {labels}")
 # print(f"Answer Tokenized: {labels_tokens}")
 
 # Generate the answer
-predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=128, temperature=1.0, top_k=None)
+predicted_answer = model.generate(input_ids=input_ids['input_ids'], encoder_mask=attention_mask, max_new_tokens=1, temperature=1.0, top_k=None, keep_routing_history=True)
 
 generated_ids = predicted_answer[0].cpu().tolist()
 generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
@@ -49,3 +70,15 @@ generated_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
 # Print the results
 print(f"Predicted Answer: {generated_text}")
 print(f"Generated Tokens: {generated_ids}")
+
+# Assuming 'model' is your CoLT5 model instance and routing history has been kept during training/inference
+
+# Extract routing histories
+router_histories = extract_router_history(model)
+
+# Display the routing histories
+for router_name, history in router_histories.items():
+    print(f"Router: {router_name}")
+    print(f"Selected Indices: {history['selected_indices']}")
+    print(f"Selected Scores: {history['selected_scores']}\n")
+

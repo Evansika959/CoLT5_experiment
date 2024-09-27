@@ -81,7 +81,7 @@ model = CoLT5(num_layers=6, dim=512).to('cuda')
 # ============================
 
 # Define Optimizer and Scheduler
-optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
+optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, verbose=True)
 
 # Define Loss Function
