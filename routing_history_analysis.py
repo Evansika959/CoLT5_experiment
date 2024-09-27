@@ -17,7 +17,7 @@ def load_routing_history(file_path='routing_history.pkl'):
         routing_history = pickle.load(f)
     return routing_history
 
-def compare_similarity_per_batch(layer_num, router_histories, batchsize=64):
+def compare_similarity_per_batch(layer_num, router_histories):
     """
     Compares the similarity between ff.router and kv.router for each batch in a specific encoder layer.
 
@@ -58,6 +58,9 @@ def compare_similarity_per_batch(layer_num, router_histories, batchsize=64):
         
         print("batch length: ", len(selected_kv_batch))
 
+        sum_similarity = 0
+        tier0 = 0
+        tier1 = 0
         for batch_idx in range(len(selected_kv_batch)):
             selected_kv = selected_kv_batch[batch_idx]
             selected_ffn = selected_ffn_batch[batch_idx]
@@ -74,10 +77,18 @@ def compare_similarity_per_batch(layer_num, router_histories, batchsize=64):
         
             similarity = len(intersection) / len(selected_kv_set)
 
-            if similarity > 0.5:
-                print(selected_ffn,selected_kv,batch_idx,data_idx)
+            sum_similarity += similarity
+
+            if similarity == 0.75:
+                tier1 += 1
+
+            if similarity == 1:
+                tier0 += 1
         
-        similarity_scores.append(similarity)
+        similarity_scores.append(sum_similarity / len(selected_kv_batch))
+        print("tier0: ", tier0)
+        print("tier1: ", tier1)
+        print("similarity: ", sum_similarity / len(selected_kv_batch))
     
     return similarity_scores
 
