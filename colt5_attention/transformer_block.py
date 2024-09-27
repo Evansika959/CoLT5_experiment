@@ -960,7 +960,7 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         window_size = self.heavy_window_size
 
         x, seq_len = pad_to_multiple(x, window_size, dim = -2)
-        print(seq_len,seq_len.shape)
+        print(seq_len)
         if (mask is not None):
             seq_len = torch.sum(mask, dim=1)
             # print(seq_len,mask)
