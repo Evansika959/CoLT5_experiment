@@ -95,7 +95,7 @@ router_histories = extract_router_history(model)
 
 for router_name, history in router_histories.items():
     print(f"Router: {router_name}")
-    print(f"Selected Indices: {history['selected_indices'].length,history['selected_indices'][0].shape}")
+    print(f"Selected Indices: {len(history['selected_indices']),history['selected_indices'][0].shape}")
 
 # def compare_similarity(router_name):
 #     kv_router = ".conditional_attn.kv_router"
