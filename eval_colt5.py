@@ -92,9 +92,9 @@ print(f"Average Test Loss: {average_loss}")
 # Extract routing histories
 router_histories = extract_router_history(model)
 
-# for router_name, history in router_histories.items():
-#     print(f"Router: {router_name}")
-#     print(f"Selected Indices: {history['selected_indices']}")
+for router_name, history in router_histories.items():
+    print(f"Router: {router_name}")
+    print(f"Selected Indices: {history['selected_indices']}")
 
 def compare_similarity(router_name):
     kv_router = ".conditional_attn.kv_router"
