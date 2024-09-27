@@ -106,8 +106,23 @@ router_histories = extract_router_history(model)
 #     similarity = len(common_indices) / len(kv_router)
 #     return similarity
 
-# Save routing histories to a file using pickle
-with open('routing_history.pkl', 'wb') as f:
-    pickle.dump(router_histories, f)
+from routing_history_analysis import compare_similarity_per_batch, plot_similarity_histogram
 
-print("Routing histories have been saved to 'routing_history.pkl'.")
+# Define the number of encoder layers
+num_encoder_layers = 6  # Adjust based on your model's architecture
+
+# Initialize a dictionary to store similarity scores per layer
+layer_similarity = {}
+
+# Compute similarity scores for each layer
+for layer in range(num_encoder_layers):
+    print(f"\nProcessing Layer {layer}...")
+    similarity_scores = compare_similarity_per_batch(layer, router_histories)
+    layer_similarity[layer] = similarity_scores
+    print(f"Completed Layer {layer}: {len(similarity_scores)} batches compared.")
+
+# Example: Plot histogram for each layer
+for layer, scores in layer_similarity.items():
+    plot_similarity_histogram(scores, layer)
+
+print("Evaluation complete. Routing history analysis finished.")
