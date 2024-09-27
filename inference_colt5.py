@@ -49,12 +49,12 @@ sample_question = sample['question']
 input_text = f"trivia question: {sample_question}"
 
 # Tokenize the input
-input_ids = tokenizer(input_text, return_tensors='pt', padding='max_length', truncation=True, max_length=128).to('cuda')
+input_ids = tokenizer(input_text, return_tensors='pt', padding='max_length', truncation=True, max_length=512).to('cuda')
 attention_mask = input_ids['attention_mask'].bool().to('cuda')
 
 # Prepare the labels
 labels = sample['answer']['value'] if sample['answer'] else ""
-labels_tokens = tokenizer(labels, return_tensors='pt', padding='max_length', truncation=True, max_length=128).input_ids.to('cuda')
+labels_tokens = tokenizer(labels, return_tensors='pt', padding='max_length', truncation=True, max_length=512).input_ids.to('cuda')
 
 # Print the sample question and expected answer
 print(f"Sample Question: {sample_question}")

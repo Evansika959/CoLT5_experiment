@@ -158,7 +158,7 @@ class CoLT5(nn.Module):
         for step in range(max_new_tokens):
             # Forward pass through the model
             with torch.no_grad():
-                logits = self(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=encoder_mask, keep_routing_history=keep_routing_history)
+                logits = self(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=encoder_mask, decoder_mask=decoder_mask, keep_routing_history=keep_routing_history)
             
             # Get the logits for the last non-PAD token in each sequence
             # Find the first PAD position per batch
