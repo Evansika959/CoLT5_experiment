@@ -10,13 +10,7 @@ def inspect_routing_history(routing_history):
         print(f"Router: {router_name}")
         print(f"Type of history: {type(history)}")
         print(f"Number of batches: {len(history)}")
-        if len(history) > 0:
-            print(f"First batch: {history[0]}")
-            if isinstance(history[0], list):
-                print(f"Number of samples in first batch: {len(history[0])}")
-                if len(history[0]) > 0:
-                    print(f"First sample selected indices: {history[0][0]}")
-        print("-" * 50)
+        
 
 if __name__ == "__main__":
     routing_history = load_routing_history('routing_history.pkl')
