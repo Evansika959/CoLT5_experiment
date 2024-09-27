@@ -6,7 +6,7 @@ from transformers import T5Tokenizer
 
 # Define the CoLT5 Encoder
 
-seq_len = 128
+seq_len = 64
 num_heavy_tokens = 4
 
 class CoLT5Encoder(nn.Module):
