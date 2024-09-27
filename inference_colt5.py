@@ -92,6 +92,6 @@ def compare_similarity(router_name):
     similarity = len(common_indices) / len(kv_router)
     return similarity
 
-print(f"Similarity between KV and FFN routers: {compare_similarity('model.encoder.layers.3')}")
+print(f"Similarity between KV and FFN routers: {compare_similarity('encoder.layers.3')}")
 
 
