@@ -37,9 +37,9 @@ def compare_similarity_per_batch(layer_num, router_histories):
     ffn_router_name = f'encoder.layers.{layer_num}{ffn_router_suffix}'
     
     # Retrieve routing histories
-    kv_history = router_histories.get(kv_router_name, [])
+    kv_history = router_histories[kv_router_name]['selected_indices']
     print(kv_history)
-    ffn_history = router_histories.get(ffn_router_name, [])
+    ffn_history = router_histories[ffn_router_name]['selected_indices']
     print(ffn_history)
     
     if len(kv_history) != len(ffn_history):
