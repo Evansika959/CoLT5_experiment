@@ -345,7 +345,10 @@ class CoordinateDescentRouter(nn.Module):
         # Initialize routing history storage
         self.routing_history = {
             'selected_indices': [],
-            'selected_scores': []
+            'selected_scores': [],
+            'routed_tokens': [],
+            'routed_mask': [],
+            'input_mask': []
         }
 
     def route_back(self, src, routed_tokens, indices):
@@ -360,6 +363,7 @@ class CoordinateDescentRouter(nn.Module):
         self.routing_history = {
             'selected_indices': [],
             'selected_scores': [],
+            'routed_tokens': [],
             'routed_mask': [],
             'input_mask': []
         }
@@ -508,6 +512,7 @@ class CoordinateDescentRouter(nn.Module):
         if keep_history:
             self.routing_history['selected_indices'].append(selected_indices)
             self.routing_history['selected_scores'].append(selected_scores)
+            self.routing_history['routed_tokens'].append(routed_tokens)
             self.routing_history['routed_mask'].append(routed_mask)
             self.routing_history['input_mask'].append(mask)
 
