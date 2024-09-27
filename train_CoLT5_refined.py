@@ -123,10 +123,18 @@ for epoch in range(epochs):
         decoder_input_ids[:, 1:] = labels[:, :-1]  # Shift labels for decoder input
         decoder_input_ids[:, 0] = tokenizer.pad_token_id  # Ensure the first token is pad
 
+        decoder_mask = labels != tokenizer.pad_token_id
+        decoder_mask[:, 1:] = decoder_mask[:,:-1]
+        decoder_mask[:,0] = True
+        decoder_mask = decoder_mask.to('cuda')
+
+        print(labels)
+        print(decoder_mask)
+
         optimizer.zero_grad()
 
         # Forward pass
-        logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask)
+        logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask, decoder_mask=decoder_mask)
 
         # Compute loss
         loss = loss_fn(logits.view(-1, logits.size(-1)), labels.view(-1))
@@ -168,9 +176,6 @@ for epoch in range(epochs):
             decoder_mask[:, 1:] = decoder_mask[:,:-1]
             decoder_mask[:,0] = True
             decoder_mask = decoder_mask.to('cuda')
-
-            print(labels)
-            print(decoder_mask)
 
             # Forward pass
             logits = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids, mask=mask, decoder_mask=decoder_mask)
