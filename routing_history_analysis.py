@@ -58,8 +58,8 @@ def compare_similarity_per_batch(layer_num, router_histories, batchsize=64):
         
 
         for batch_idx in range(batchsize):
-            selected_kv = selected_kv_batch[batch_idx]
-            selected_ffn = selected_ffn_batch[batch_idx]
+            selected_kv = selected_kv_batch[batch_idx].tolist()
+            selected_ffn = selected_ffn_batch[batch_idx].tolist()
 
             if data_idx == 1 and batch_idx == 1:
                 print(selected_kv)
