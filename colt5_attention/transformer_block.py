@@ -942,6 +942,7 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         num_heavy_tokens_q = None,
         num_heavy_tokens_kv = None,
         keep_routing_history = False,
+        mask = None,
         random_route = False
     ):
         batch, seq, device = *x.shape[:2], x.device
@@ -951,7 +952,7 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
 
         # light local attention sees all tokens in a limited context
 
-        light_out = self.light_attn(x)
+        light_out = self.light_attn(x, mask = mask)
 
         # pad sequence to multiple of the heavy window size
         # routing will take place within each heavy window block size
@@ -959,6 +960,9 @@ class ConditionalRoutedAutoregressiveAttention(nn.Module):
         window_size = self.heavy_window_size
 
         x, seq_len = pad_to_multiple(x, window_size, dim = -2)
+        if (mask is not None):
+            seq_len = torch.sum(mask, dim=1)
+            print(seq_len,mask)
 
         padded_seq_len = x.shape[-2]
 
@@ -1329,18 +1333,19 @@ class ConditionalRoutedDecoderBlock(nn.Module):
         x,
         encoder_hidden_states,
         context_mask = None,
+        decoder_mask = None,
         num_heavy_attn_tokens_q = None,
         num_heavy_attn_tokens_kv = None,
         keep_routing_history = False,
         num_heavy_ff_tokens = None
     ):
         # Self-attention within the decoder block
-        x = self.conditional_self_auto_regressive_attn(x, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
+        x = self.conditional_self_auto_regressive_attn(x, mask=decoder_mask, num_heavy_tokens_q=num_heavy_attn_tokens_q, num_heavy_tokens_kv=num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
         
         # Cross-attention with encoder hidden states
-        x = self.conditional_cross_attn(x, context=encoder_hidden_states, context_mask=context_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
+        x = self.conditional_cross_attn(x, context=encoder_hidden_states, context_mask=context_mask, mask=decoder_mask, num_tokens_q=num_heavy_attn_tokens_q, num_tokens_kv=num_heavy_attn_tokens_kv, keep_routing_history=keep_routing_history) + x
         
         # Feedforward network
-        x = self.conditional_ff(x, num_heavy_tokens=num_heavy_ff_tokens) + x
+        x = self.conditional_ff(x, num_heavy_tokens=num_heavy_ff_tokens, mask=decoder_mask) + x
         return x
 
