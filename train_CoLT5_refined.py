@@ -98,7 +98,7 @@ train_losses = []
 val_losses = []
 
 # Early Stopping Parameters
-patience = 3
+patience = 5
 best_val_loss = float('inf')
 counter = 0
 
